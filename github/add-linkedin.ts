@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { graphql } from "@octokit/graphql";
 import { eq, isNull } from "drizzle-orm";
-import { RateLimiter } from "./graphql";
+import { RateLimiter } from "../utils/rate-limiter";
 import { db } from "../server/db";
 import * as schema from "../server/db/schema";
 

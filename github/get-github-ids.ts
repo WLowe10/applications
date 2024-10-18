@@ -2,7 +2,7 @@ import "dotenv/config";
 import fs from "fs/promises";
 import { graphql } from "@octokit/graphql";
 import { and, isNotNull, isNull } from "drizzle-orm";
-import { RateLimiter } from "./graphql";
+import { RateLimiter } from "../utils/rate-limiter";
 import { env } from "../lib/env";
 import { db } from "../server/db";
 import * as schema from "../server/db/schema";

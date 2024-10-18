@@ -24,16 +24,14 @@ import {
 	or,
 	sql,
 } from "drizzle-orm";
-import { Pinecone } from "@pinecone-database/pinecone";
 import OpenAI from "openai";
 import axios from "axios";
-//@ts-ignore
 import { v4 as uuid } from "uuid";
 import dotenv from "dotenv";
 import ws from "ws";
 import { jsonArrayContainsAny } from "@/lib/utils";
 import { graphql } from "@octokit/graphql";
-import { RateLimiter } from "@/github/graphql";
+import { RateLimiter } from "../utils/rate-limiter";
 
 neonConfig.webSocketConstructor = ws;
 

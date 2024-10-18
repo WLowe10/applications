@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { graphql } from "@octokit/graphql";
-import { RateLimiter } from "./graphql";
+import { RateLimiter } from "../utils/rate-limiter";
 import {
 	gatherTopSkills,
 	generateMiniSummary,
