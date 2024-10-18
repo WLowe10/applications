@@ -1,5 +1,4 @@
-import ListeningCompanies from "./companies-listening";
-import ScrapedDialog from "./scraped-dialog";
+import { ScrapedDialog } from "../components/scraped-dialog";
 
 export default async function Home() {
 	return (

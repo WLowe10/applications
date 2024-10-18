@@ -5,12 +5,11 @@ import { Avatar, Button, Flex, ScrollArea, TextFieldInput, Text, Separator } fro
 import { Info, Loader, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useScrapedDialogStore } from "./store/filter-store";
+import { useScrapedDialogStore } from "../lib/stores/filter-store";
 import { motion } from "framer-motion";
-import { set } from "zod";
-import { useCompaniesViewStore } from "./companies-view-store";
+import { useCompaniesViewStore } from "../lib/stores/companies-view-store";
 
-export default function CompaniesView() {
+export function CompaniesView() {
 	const { filters: scrapedFilters, setFilters: setScrapedFilters } = useScrapedDialogStore();
 	const { companiesRemoved, setCompaniesRemoved } = useCompaniesViewStore();
 	const [open, setOpen] = useState(false);

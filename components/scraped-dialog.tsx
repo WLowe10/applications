@@ -12,15 +12,11 @@ import {
 	Flex,
 	TextFieldInput,
 	DialogClose,
-	Badge,
-	Avatar,
 	ScrollArea,
 	TextArea,
-	Link,
 	Heading,
 	Separator,
 	Card,
-	Checkbox,
 } from "frosted-ui";
 import {
 	Accordion,
@@ -33,10 +29,8 @@ import {
 	Check,
 	Loader,
 	Upload,
-	UserRoundSearch,
 	X,
 	Info,
-	Trash2,
 	Building,
 	Briefcase,
 	TreePalm,
@@ -44,7 +38,6 @@ import {
 	Linkedin,
 	School,
 	GraduationCap,
-	Loader2,
 	ChartNetwork,
 	TwitterIcon,
 	Braces,
@@ -54,15 +47,15 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
-import CandidateCard from "./candidate-card";
+import { toPascalCase } from "@/utils/one-liners";
+import { CandidateCard } from "./candidate-card";
 import { InferSelectModel } from "drizzle-orm";
-import { candidates, company as companyTable, people } from "@/server/db/schemas/users/schema";
-import { CompanyFilterReturnType, useScrapedDialogStore } from "./store/filter-store";
+import { CompanyFilterReturnType, useScrapedDialogStore } from "../lib/stores/filter-store";
 import { Toaster } from "@/components/ui/sonner";
-import CompaniesView from "./companies-view";
+import { CompaniesView } from "./companies-view";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useCompaniesViewStore } from "./companies-view-store";
+import { useCompaniesViewStore } from "../lib/stores/companies-view-store";
+import type { people } from "@/server/db/schema";
 
 interface ProfileUrl {
 	type: "linkedin" | "github";
@@ -85,20 +78,13 @@ interface Company {
 	// ... other company properties
 }
 
-const toPascalCase = (str: string) => {
-	return str
-		.split(" ")
-		.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-		.join(" ");
-};
-
 function extractTwitterUsernames(content: string): string[] {
 	const twitterRegex = /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/(@?\w+)/gi;
 	const matches = content.matchAll(twitterRegex);
 	return Array.from(matches, (m) => m[1]!.replace("@", ""));
 }
 
-export default function ScrapedDialog() {
+export function ScrapedDialog() {
 	const { filters, setFilters } = useScrapedDialogStore();
 	const [loading, setLoading] = useState(false);
 	const [filtersLoading, setFiltersLoading] = useState(false);

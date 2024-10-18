@@ -2,13 +2,7 @@ import { neonConfig, Pool } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import * as schema from "../server/db/schemas/users/schema";
 import { z } from "zod";
-import {
-	candidates,
-	jobTitles,
-	people,
-	profileQueue,
-	skills,
-} from "@/server/db/schemas/users/schema";
+import { candidates, jobTitles, people, profileQueue, skills } from "@/server/db/schema";
 import {
 	and,
 	cosineDistance,

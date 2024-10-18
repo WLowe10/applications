@@ -1,24 +1,9 @@
 "use client";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { people, company as companyTable } from "@/server/db/schemas/users/schema";
+import type { people, company as companyTable } from "@/server/db/schema";
 import { InferSelectModel } from "drizzle-orm";
-import {
-	Card,
-	Heading,
-	Text,
-	Link,
-	Avatar,
-	Badge,
-	Flex,
-	Separator,
-	Table,
-	TableBody,
-	TableCell,
-	TableHeader,
-	TableRow,
-	Button,
-} from "frosted-ui";
+import { Card, Heading, Text, Link, Avatar, Badge, Flex, Separator } from "frosted-ui";
 import {
 	Linkedin,
 	Github,
@@ -27,13 +12,12 @@ import {
 	TreePalm,
 	GraduationCap,
 	Book,
-	Info as InfoIcon,
 	Plus,
 	ChartNetwork,
 } from "lucide-react";
 import Image from "next/image";
 
-export default function CandidateCard({
+export function CandidateCard({
 	candidate,
 	company,
 }: {

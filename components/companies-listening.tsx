@@ -3,9 +3,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Button, DialogContent, DialogRoot, DialogTrigger } from "frosted-ui";
 import { Building } from "lucide-react";
 import { useState } from "react";
-import CompaniesView from "./companies-view";
+import { CompaniesView } from "./companies-view";
 
-export default function ListeningCompanies() {
+export function ListeningCompanies() {
 	const [open, setOpen] = useState(false);
 
 	return (

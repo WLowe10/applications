@@ -1,23 +1,7 @@
-// app/api/webhook/route.ts
-
-import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import dotenv from "dotenv";
-import * as userSchema from "../../../server/db/schemas/users/schema";
 import { eq } from "drizzle-orm";
-
-dotenv.config({
-	path: "../.env",
-});
-
-const connection = neon(process.env.DB_URL!);
-
-const db = drizzle(connection, {
-	schema: {
-		...userSchema,
-	},
-});
+import { db } from "@/server/db";
+import * as schema from "../../../server/db/schema";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
 	try {
@@ -41,9 +25,9 @@ export async function POST(req: NextRequest) {
 			cookdScore = Number(bodyJson.score.numericScore.score);
 
 			await db
-				.update(userSchema.candidates)
+				.update(schema.candidates)
 				.set({ cookdData, cookdScore, cookdReviewed: true })
-				.where(eq(userSchema.candidates.id, id));
+				.where(eq(schema.candidates.id, id));
 
 			console.log(`Updated Cookd data for ${id}`);
 		} catch (parseError) {
