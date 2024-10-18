@@ -24,7 +24,7 @@ export const env = createEnv({
 	},
 	runtimeEnv: {
 		NODE_ENV: process.env.NODE_ENV,
-		DB_URL: process.env.DATABASE_URL,
+		DB_URL: process.env.DB_URL,
 		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 		PINECONE_API_KEY: process.env.PINECONE_API_KEY,
 		NEXT_PUBLIC_WHOP_APP_ID: process.env.NEXT_PUBLIC_WHOP_APP_ID,
