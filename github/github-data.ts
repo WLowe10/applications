@@ -1,33 +1,20 @@
+import "dotenv/config";
 import { graphql } from "@octokit/graphql";
 import { RateLimiter } from "./graphql";
 import {
 	gatherTopSkills,
 	generateMiniSummary,
-	generateSummary,
 	scrapeLinkedInProfile,
 } from "@/src/find-similar-profiles-linkedin-subscriber";
 import { getNormalizedLocation, getNormalizedCountry } from "@/scripts/normalized-location-github";
-import dotenv from "dotenv";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
-import OpenAI from "openai";
-import * as schema from "../server/db/schemas/users/schema";
-import { eq, and, or } from "drizzle-orm";
-import { chunk } from "lodash";
+import { eq, or } from "drizzle-orm";
 import { Queue } from "async-await-queue";
-import { sql } from "drizzle-orm";
 import { Mutex } from "async-mutex";
-
-dotenv.config({ path: "../.env" });
+import { openai } from "../lib/clients";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 const rateLimiter = new RateLimiter();
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, { schema });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY!,
-});
 
 const organizations = [
 	// "digitalocean",
@@ -742,7 +729,7 @@ async function getEmbedding(text: string): Promise<number[]> {
 		throw new Error("No embedding returned from OpenAI API");
 	}
 
-	return response.data[0].embedding;
+	return response.data[0]!.embedding;
 }
 
 function computeAverageEmbedding(embeddings: number[][]): number[] | null {
@@ -750,7 +737,8 @@ function computeAverageEmbedding(embeddings: number[][]): number[] | null {
 		console.log("No embeddings to average.");
 		return null;
 	}
-	const vectorLength = embeddings[0].length;
+
+	const vectorLength = embeddings[0]!.length;
 	const sumVector = new Array(vectorLength).fill(0);
 
 	embeddings.forEach((embedding) => {
@@ -786,7 +774,7 @@ async function upsertData(table: any, columnName: string, value: string, personI
 			.limit(1);
 
 		if (existingRow.length > 0) {
-			const currentPersonIds = existingRow[0].personIds || [];
+			const currentPersonIds = existingRow[0]!.personIds || [];
 			if (!currentPersonIds.includes(personId)) {
 				try {
 					await db
@@ -796,9 +784,9 @@ async function upsertData(table: any, columnName: string, value: string, personI
 				} catch (error) {
 					console.error(`Error updating for ${value}:`, error);
 				}
-				return existingRow[0].vector;
+				return existingRow[0]!.vector;
 			} else {
-				return existingRow[0].vector;
+				return existingRow[0]!.vector;
 			}
 		} else {
 			const vector = await getEmbedding(value);

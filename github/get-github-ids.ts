@@ -1,37 +1,21 @@
-import { graphql } from "@octokit/graphql";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { and, eq, isNotNull, isNull } from "drizzle-orm";
-import { RateLimiter } from "./graphql";
-import { Pool } from "@neondatabase/serverless";
-import dotenv from "dotenv";
+import "dotenv/config";
 import fs from "fs/promises";
+import { graphql } from "@octokit/graphql";
+import { and, isNotNull, isNull } from "drizzle-orm";
+import { RateLimiter } from "./graphql";
+import { env } from "../lib/env";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
-dotenv.config({ path: "../.env" });
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-
-if (!GITHUB_TOKEN) {
-	throw new Error("GitHub token is required in .env file");
-}
-
-const pool = new Pool({
-	connectionString: process.env.DB_URL,
-});
-const db = drizzle(pool, {
-	schema: {
-		...userSchema,
-	},
-});
 const rateLimiter = new RateLimiter();
 
 async function updateGithubIds() {
 	console.log("Starting to update GitHub IDs");
 
 	const allUsers = await db
-		.select({ githubLogin: userSchema.people.githubLogin })
-		.from(userSchema.people)
-		.where(and(isNotNull(userSchema.people.githubLogin), isNull(userSchema.people.githubImage)))
+		.select({ githubLogin: schema.people.githubLogin })
+		.from(schema.people)
+		.where(and(isNotNull(schema.people.githubLogin), isNull(schema.people.githubImage)))
 		.limit(100000);
 
 	console.log(`Found ${allUsers.length} users to process`);
@@ -82,7 +66,7 @@ async function processUser(user: { githubLogin: string }) {
       `,
 				login: user.githubLogin,
 				headers: {
-					authorization: `Bearer ${GITHUB_TOKEN}`,
+					authorization: `Bearer ${env.GITHUB_TOKEN}`,
 				},
 			});
 		});

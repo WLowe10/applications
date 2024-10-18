@@ -1,7 +1,5 @@
+import "dotenv/config";
 import { Octokit } from "@octokit/rest";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 interface GitHubUser {
 	login: string;

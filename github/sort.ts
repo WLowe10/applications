@@ -1,15 +1,6 @@
-import * as dotenv from "dotenv";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
+import "dotenv/config";
 import fs from "fs";
-
-dotenv.config({ path: "../.env" });
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-export const db = drizzle(pool, {
-	schema: userSchema,
-});
+import { db } from "../server/db";
 
 // Function to calculate language score based on stars and repos for JS, TS, and Ruby
 const calculateLanguageScore = (languages: any): number => {

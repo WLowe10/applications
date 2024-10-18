@@ -1,16 +1,8 @@
-import * as dotenv from "dotenv";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { promises as fs } from "fs";
+import "dotenv/config";
+import fs from "fs/promises";
 import { eq } from "drizzle-orm";
-
-dotenv.config({ path: "../.env" });
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-export const db = drizzle(pool, {
-	schema: userSchema,
-});
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 const updateUser = async (row: string) => {
 	const imageMatch = row.match(/github_image='([^']+)'/);
@@ -21,9 +13,9 @@ const updateUser = async (row: string) => {
 		const githubLogin = loginMatch[1];
 
 		await db
-			.update(userSchema.people)
+			.update(schema.people)
 			.set({ githubImage })
-			.where(eq(userSchema.people.githubLogin, githubLogin));
+			.where(eq(schema.people.githubLogin, githubLogin));
 		console.log("Updated", githubLogin);
 	} else {
 		console.warn("Skipping invalid row:", row);

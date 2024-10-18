@@ -1,9 +1,9 @@
+import "dotenv/config";
 import { graphql } from "@octokit/graphql";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { drizzle } from "drizzle-orm/neon-serverless";
 import { eq, isNull } from "drizzle-orm";
 import { RateLimiter } from "./graphql";
-import { Pool } from "@neondatabase/serverless";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
@@ -11,20 +11,14 @@ if (!GITHUB_TOKEN) {
 	throw new Error("GitHub token is required in .env file");
 }
 
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, {
-	schema: {
-		...userSchema,
-	},
-});
 const rateLimiter = new RateLimiter();
 
 async function updateLinkedInUrls() {
 	// Fetch all GitHub users from the database
 	const allUsers = await db
 		.select()
-		.from(userSchema.githubUsers)
-		.where(isNull(userSchema.githubUsers.linkedinUrl));
+		.from(schema.githubUsers)
+		.where(isNull(schema.githubUsers.linkedinUrl));
 
 	for (const user of allUsers) {
 		console.log(`Fetching LinkedIn URL for user: ${user.login}`);
@@ -73,9 +67,9 @@ async function updateLinkedInUrls() {
 			}
 
 			await db
-				.update(userSchema.githubUsers)
+				.update(schema.githubUsers)
 				.set({ linkedinUrl: linkedinUrl })
-				.where(eq(userSchema.githubUsers.login, user.login));
+				.where(eq(schema.githubUsers.login, user.login));
 		} catch (error) {
 			console.error(`Error processing user ${user.login}:`, error);
 		}

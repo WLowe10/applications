@@ -1,6 +1,5 @@
+import "dotenv/config";
 import { graphql } from "@octokit/graphql";
-import * as dotenv from "dotenv";
-import * as userSchema from "../server/db/schemas/users/schema";
 import {
 	people,
 	locationsVector,
@@ -9,31 +8,15 @@ import {
 	schools,
 	companiesVectorNew,
 	jobTitlesVectorNew,
-} from "../server/db/schemas/users/schema";
-import OpenAI from "openai";
+} from "../server/db/schema";
 import { eq } from "drizzle-orm";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
 import axios from "axios";
 import fetch from "node-fetch";
 import { isNotNull, or, isNull, and } from "drizzle-orm";
-
-dotenv.config({ path: "../.env" });
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-
-if (!GITHUB_TOKEN) {
-	throw new Error("GitHub token is required in .env file");
-}
-
-const pool = new Pool({
-	connectionString: process.env.DB_URL,
-});
-const db = drizzle(pool, {
-	schema: {
-		...userSchema,
-	},
-});
+import { db } from "../server/db";
+import { openai } from "../lib/clients";
+import { env } from "../lib/env";
+import * as schema from "../server/db/schema";
 
 export class RateLimiter {
 	private isWaiting: boolean = false;
@@ -69,12 +52,6 @@ export class RateLimiter {
 
 const rateLimiter = new RateLimiter();
 
-dotenv.config({ path: "../.env" });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
 export const askCondition = async (condition: string): Promise<boolean> => {
 	const completion = await openai.chat.completions.create({
 		messages: [
@@ -94,7 +71,7 @@ export const askCondition = async (condition: string): Promise<boolean> => {
 		max_tokens: 256,
 	});
 
-	const result = JSON.parse(completion.choices[0].message.content ?? '{ "condition": false }')
+	const result = JSON.parse(completion.choices[0]!.message.content ?? '{ "condition": false }')
 		.condition as boolean;
 
 	return result;
@@ -139,7 +116,7 @@ const fetchOrganizationMembers = async (orgName: string) => {
 				orgName,
 				cursor,
 				headers: {
-					authorization: `Bearer ${GITHUB_TOKEN}`,
+					authorization: `Bearer ${env.GITHUB_TOKEN}`,
 				},
 			});
 		});
@@ -273,7 +250,7 @@ const fetchUserDetails = async (username: string, isTopLevelMember: boolean) => 
 			query,
 			login: username,
 			headers: {
-				authorization: `Bearer ${GITHUB_TOKEN}`,
+				authorization: `Bearer ${env.GITHUB_TOKEN}`,
 			},
 		});
 
@@ -379,7 +356,7 @@ async function upsertJobTitleEmbedding(personId: string, jobTitle: string) {
 		.limit(1);
 
 	if (existingJobTitle.length > 0) {
-		const currentPersonIds = existingJobTitle[0].personIds || [];
+		const currentPersonIds = existingJobTitle[0]!.personIds || [];
 		const updatedPersonIds = Array.from(new Set([...currentPersonIds, personId]));
 		await db
 			.update(jobTitlesVectorNew)
@@ -589,7 +566,7 @@ Examples:
 			temperature: 0,
 			max_tokens: 256,
 		});
-		return completion.choices[0].message.content?.trim().toUpperCase() || "UNKNOWN";
+		return completion.choices[0]!.message.content?.trim().toUpperCase() || "UNKNOWN";
 	} catch (error) {
 		console.error(`Error normalizing location for "${location}":`, error);
 		return "UNKNOWN";
@@ -599,7 +576,7 @@ Examples:
 const insertOrUpdateUser = async (processedData: any) => {
 	try {
 		await db
-			.insert(userSchema.people)
+			.insert(schema.people)
 			.values({
 				id: processedData.login,
 				name: processedData.name || null,
@@ -636,7 +613,7 @@ const insertOrUpdateUser = async (processedData: any) => {
 				twitterBio: processedData.twitterBio || null,
 			})
 			.onConflictDoUpdate({
-				target: userSchema.people.githubLogin,
+				target: schema.people.githubLogin,
 				set: {
 					name: processedData.name || null,
 					location: processedData.location || null,
@@ -680,7 +657,7 @@ const insertOrUpdateUser = async (processedData: any) => {
 const processFollowing = async (followingList: any[]) => {
 	for (const followingPerson of followingList) {
 		const exists = await db.query.people.findFirst({
-			where: eq(userSchema.people.githubLogin, followingPerson.login),
+			where: eq(schema.people.githubLogin, followingPerson.login),
 		});
 		if (exists) {
 			console.log("skipping..");
@@ -750,7 +727,7 @@ async function getEmbedding(text: string): Promise<number[]> {
 		throw new Error("No embedding returned from OpenAI API");
 	}
 
-	return response.data[0].embedding;
+	return response.data[0]!.embedding;
 }
 
 async function upsertSkillEmbedding(personId: string, skill: string) {
@@ -762,7 +739,7 @@ async function upsertSkillEmbedding(personId: string, skill: string) {
 		.limit(1);
 
 	if (existingSkill.length > 0) {
-		const currentPersonIds = existingSkill[0].personIds || [];
+		const currentPersonIds = existingSkill[0]!.personIds || [];
 		const updatedPersonIds = Array.from(new Set([...currentPersonIds, personId]));
 		await db
 			.update(skillsNew)
@@ -789,7 +766,7 @@ async function upsertCompanyEmbedding(personId: string, company: string) {
 		.limit(1);
 
 	if (existingCompany.length > 0) {
-		const currentPersonIds = existingCompany[0].personIds || [];
+		const currentPersonIds = existingCompany[0]!.personIds || [];
 		const updatedPersonIds = Array.from(new Set([...currentPersonIds, personId]));
 		await db
 			.update(companiesVectorNew)
@@ -816,7 +793,7 @@ async function upsertSchoolEmbedding(personId: string, school: string) {
 		.limit(1);
 
 	if (existingSchool.length > 0) {
-		const currentPersonIds = existingSchool[0].personIds || [];
+		const currentPersonIds = existingSchool[0]!.personIds || [];
 		const updatedPersonIds = Array.from(new Set([...currentPersonIds, personId]));
 		await db
 			.update(schools)
@@ -843,7 +820,7 @@ async function upsertFieldOfStudyEmbedding(personId: string, fieldOfStudy: strin
 		.limit(1);
 
 	if (existingFieldOfStudy.length > 0) {
-		const currentPersonIds = existingFieldOfStudy[0].personIds || [];
+		const currentPersonIds = existingFieldOfStudy[0]!.personIds || [];
 		const updatedPersonIds = Array.from(new Set([...currentPersonIds, personId]));
 		await db
 			.update(fieldsOfStudy)
@@ -870,7 +847,7 @@ async function upsertLocationEmbedding(personId: string, normalizedLocation: str
 		.limit(1);
 
 	if (existingLocation.length > 0) {
-		const currentPersonIds = existingLocation[0].personIds || [];
+		const currentPersonIds = existingLocation[0]!.personIds || [];
 		const updatedPersonIds = Array.from(new Set([...currentPersonIds, personId]));
 		await db
 			.update(locationsVector)
