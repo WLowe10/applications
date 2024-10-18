@@ -7,17 +7,12 @@ import { Resource } from "sst";
 import { parse } from "json2csv";
 import { TRPCError } from "@trpc/server";
 import { openai, pinecone } from "@/lib/clients";
+import { getEmbedding } from "@/lib/ai";
 import * as schema from "@/server/db/schema";
-
-async function getEmbedding(text: string) {
-	const response = await openai.embeddings.create({
-		model: "text-embedding-3-large",
-		input: text,
-		encoding_format: "float",
-	});
-
-	return response.data[0]!.embedding;
-}
+import {
+	findFilteredCandidatesInputSchema,
+	getAbsoluteFilteredTopCandidatesInputSchema,
+} from "@/lib/schemas";
 
 const index = pinecone.Index("whop");
 
@@ -128,24 +123,30 @@ async function querySimilarJobTitles(job: string) {
 
 export const outboundRouter = createTRPCRouter({
 	getAbsoluteFilteredTopCandidates: publicProcedure
-		.input(z.any())
+		.input(getAbsoluteFilteredTopCandidatesInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			console.log("input", input);
+
 			let conditions = [];
+
 			if (input.showTwitter) {
 				conditions.push(isNotNull(schema.people.twitterUsername));
 			}
+
 			if (input.showWhop) {
 				conditions.push(
 					or(eq(schema.people.isWhopUser, true), eq(schema.people.isWhopCreator, true))
 				);
 			}
+
 			if (input.showGithub) {
 				conditions.push(isNotNull(schema.people.githubLogin));
 			}
+
 			if (input.showLinkedin) {
 				conditions.push(isNotNull(schema.people.linkedinUrl));
 			}
+
 			const topCandidates = await ctx.db.query.people.findMany({
 				where: and(
 					...conditions,
@@ -192,8 +193,6 @@ export const outboundRouter = createTRPCRouter({
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
-			// const { payload } = input;
-
 			const similarProfileQueries = await ctx.db.query.profileQueue.findMany();
 
 			if (similarProfileQueries.length > 0) {
@@ -235,21 +234,7 @@ export const outboundRouter = createTRPCRouter({
 			await ctx.db.delete(schema.profileQueue).where(eq(schema.profileQueue.id, id));
 		}),
 	findFilteredCandidates: publicProcedure
-		.input(
-			z.object({
-				query: z.string(),
-				job: z.string(),
-				relevantRoleId: z.string().optional(),
-				nearBrooklyn: z.boolean(),
-				searchInternet: z.boolean(),
-				skills: z.array(z.string()),
-				booleanSearch: z.string().optional(),
-				companyIds: z.array(z.string()),
-				location: z.string().optional(),
-				activeGithub: z.boolean().optional(),
-				whopUser: z.boolean().optional(),
-			})
-		)
+		.input(findFilteredCandidatesInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			console.log("Starting findFilteredCandidates mutation");
 			const similarTechnologiesArrays = await Promise.all(
