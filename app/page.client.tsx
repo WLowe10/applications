@@ -13,12 +13,12 @@ export function ThemeSwitcherButton({
 
   const onClick = useCallback(
     () => onAccentColorChange(color),
-    [color, onAccentColorChange],
+    [color, onAccentColorChange]
   );
 
   return (
     <Button onClick={onClick} size="1" variant="classic" color={color}>
-      {color[0].toUpperCase() + color.slice(1)}
+      {color[0]!.toUpperCase() + color.slice(1)}
     </Button>
   );
 }

@@ -108,7 +108,7 @@ function extractTwitterUsernames(content: string): string[] {
   const twitterRegex =
     /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/(@?\w+)/gi;
   const matches = content.matchAll(twitterRegex);
-  return Array.from(matches, (m) => m[1].replace("@", ""));
+  return Array.from(matches, (m) => m[1]!.replace("@", ""));
 }
 
 export default function ScrapedDialog() {
@@ -348,7 +348,7 @@ export default function ScrapedDialog() {
         const skillsWeights = newWeights.skills as { [key: string]: number };
         Object.keys(skillsWeights).forEach((skill) => {
           if (skill !== skillName) {
-            const weight = skillsWeights[skill];
+            const weight = skillsWeights[skill]!;
             const adjustedWeight =
               weight - (weight / totalOtherWeights) * delta;
             skillsWeights[skill] = Math.max(adjustedWeight, 0);
@@ -1064,7 +1064,7 @@ export default function ScrapedDialog() {
                                     return filters?.job || "Job";
                                   case "companies":
                                     return filters?.companies.length === 1
-                                      ? filters?.companies[0].name
+                                      ? filters?.companies[0]!.name
                                       : "Companies";
                                   case "location":
                                     return filters?.location || "Location";
@@ -1173,9 +1173,9 @@ export default function ScrapedDialog() {
                                         textAlign: "right",
                                       }}
                                     >
-                                      {(skillsWeights[skillName] * 100).toFixed(
-                                        0
-                                      )}
+                                      {(
+                                        skillsWeights[skillName]! * 100
+                                      ).toFixed(0)}
                                       %
                                     </Text>
                                   </Flex>

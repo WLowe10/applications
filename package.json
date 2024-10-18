@@ -1,6 +1,7 @@
 {
-  "name": "whop-apps-template",
+  "name": "applications",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -11,10 +12,9 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "whop-proxy": "whop-proxy"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth/drizzle-adapter": "^1.4.1",
     "@aws-sdk/client-s3": "^3.620.0",
     "@aws-sdk/client-sqs": "^3.622.0",
     "@frosted-ui/icons": "^0.0.1-canary.15",
@@ -31,17 +31,10 @@
     "@trpc/client": "^11.0.0-rc.446",
     "@trpc/react-query": "^11.0.0-rc.446",
     "@trpc/server": "^11.0.0-rc.446",
-    "@types/bcrypt": "^5.0.2",
-    "@types/json2csv": "^5.0.7",
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/lodash": "^4.17.10",
-    "@types/ws": "^8.5.12",
-    "@whop-apps/sdk": "^0.0.1-canary.105",
     "async-await-queue": "^2.1.4",
     "async-mutex": "^0.5.0",
     "aws-sdk": "^2.1664.0",
     "axios": "^1.7.2",
-    "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
@@ -68,7 +61,6 @@
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
-    "ws": "^8.18.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
@@ -77,6 +69,9 @@
     "@types/pdf-parse": "^1.1.4",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/json2csv": "^5.0.7",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/lodash": "^4.17.10",
     "autoprefixer": "^10.0.1",
     "drizzle-kit": "^0.23.0",
     "drizzle-zod": "^0.5.1",
