@@ -25,10 +25,7 @@ import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { Resource } from "sst";
 import { parse } from "json2csv";
 import { TRPCError } from "@trpc/server";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+import { openai, pinecone } from "@/lib/clients";
 
 async function getEmbedding(text: string) {
   const response = await openai.embeddings.create({
@@ -39,10 +36,6 @@ async function getEmbedding(text: string) {
 
   return response.data[0].embedding;
 }
-
-const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY || "",
-});
 
 const index = pinecone.Index("whop");
 
