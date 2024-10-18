@@ -7,44 +7,44 @@ import { ReactNode, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 interface ThemeProviderProps {
-  children: ReactNode;
+	children: ReactNode;
 }
 
 function ThemeWrapper({ children }: { children: ReactNode }) {
-  const { theme, resolvedTheme } = useTheme();
-  const appearance = (resolvedTheme || theme) as "light" | "dark";
+	const { theme, resolvedTheme } = useTheme();
+	const appearance = (resolvedTheme || theme) as "light" | "dark";
 
-  return (
-    <Theme
-      appearance={appearance}
-      grayColor="slate"
-      accentColor="iris"
-      infoColor="sky"
-      successColor="green"
-      warningColor="yellow"
-      dangerColor="red"
-    >
-      {children}
-      <Toaster richColors />
-    </Theme>
-  );
+	return (
+		<Theme
+			appearance={appearance}
+			grayColor="slate"
+			accentColor="iris"
+			infoColor="sky"
+			successColor="green"
+			warningColor="yellow"
+			dangerColor="red"
+		>
+			{children}
+			<Toaster richColors />
+		</Theme>
+	);
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [mounted, setMounted] = useState(false);
+	const [mounted, setMounted] = useState(false);
 
-  // Ensure we're rendering client-side to avoid hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+	// Ensure we're rendering client-side to avoid hydration mismatch
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
-  if (!mounted) {
-    return null;
-  }
+	if (!mounted) {
+		return null;
+	}
 
-  return (
-    <NextThemeProvider attribute="class">
-      <ThemeWrapper>{children}</ThemeWrapper>
-    </NextThemeProvider>
-  );
+	return (
+		<NextThemeProvider attribute="class">
+			<ThemeWrapper>{children}</ThemeWrapper>
+		</NextThemeProvider>
+	);
 }

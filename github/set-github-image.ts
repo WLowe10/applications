@@ -9,47 +9,47 @@ dotenv.config({ path: "../.env" });
 
 const pool = new Pool({ connectionString: process.env.DB_URL });
 export const db = drizzle(pool, {
-  schema: userSchema,
+	schema: userSchema,
 });
 
 const updateUser = async (row: string) => {
-  const imageMatch = row.match(/github_image='([^']+)'/);
-  const loginMatch = row.match(/github_login='([^']+)'/);
+	const imageMatch = row.match(/github_image='([^']+)'/);
+	const loginMatch = row.match(/github_login='([^']+)'/);
 
-  if (imageMatch && loginMatch) {
-    const githubImage = imageMatch[1];
-    const githubLogin = loginMatch[1];
+	if (imageMatch && loginMatch) {
+		const githubImage = imageMatch[1];
+		const githubLogin = loginMatch[1];
 
-    await db
-      .update(userSchema.people)
-      .set({ githubImage })
-      .where(eq(userSchema.people.githubLogin, githubLogin));
-    console.log("Updated", githubLogin);
-  } else {
-    console.warn("Skipping invalid row:", row);
-  }
+		await db
+			.update(userSchema.people)
+			.set({ githubImage })
+			.where(eq(userSchema.people.githubLogin, githubLogin));
+		console.log("Updated", githubLogin);
+	} else {
+		console.warn("Skipping invalid row:", row);
+	}
 };
 
 const main = async () => {
-  try {
-    const sqlContent = await fs.readFile("get-github.sql", "utf-8");
-    const rows = sqlContent.trim().split("\n");
+	try {
+		const sqlContent = await fs.readFile("get-github.sql", "utf-8");
+		const rows = sqlContent.trim().split("\n");
 
-    const updatePromises = rows.map((row) => () => updateUser(row));
-    await Promise.all(updatePromises.map((fn) => fn()));
+		const updatePromises = rows.map((row) => () => updateUser(row));
+		await Promise.all(updatePromises.map((fn) => fn()));
 
-    console.log("All updates completed successfully");
-  } catch (error) {
-    console.error("Error updating GitHub images:", error);
-    throw error;
-  }
+		console.log("All updates completed successfully");
+	} catch (error) {
+		console.error("Error updating GitHub images:", error);
+		throw error;
+	}
 };
 
 main()
-  .then(() => {
-    console.log("Done");
-  })
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+	.then(() => {
+		console.log("Done");
+	})
+	.catch((e) => {
+		console.error(e);
+		process.exit(1);
+	});

@@ -8,26 +8,26 @@ import { ThemeProvider } from "./providers";
 import { TRPCReactProvider } from "@/trpc/react";
 
 const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
+	subsets: ["latin"],
+	display: "swap",
+	variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
-  title: "Whop Applications",
-  description: "Assisted tool to help filter applications.",
+	title: "Whop Applications",
+	description: "Assisted tool to help filter applications.",
 };
 
 export default function RootLayout({ children }: LayoutProps) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.variable}>
-        <TRPCReactProvider>
-          <ThemeProvider>
-            <Theme>{children}</Theme>
-          </ThemeProvider>
-        </TRPCReactProvider>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" suppressHydrationWarning>
+			<body className={inter.variable}>
+				<TRPCReactProvider>
+					<ThemeProvider>
+						<Theme>{children}</Theme>
+					</ThemeProvider>
+				</TRPCReactProvider>
+			</body>
+		</html>
+	);
 }

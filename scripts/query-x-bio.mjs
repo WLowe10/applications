@@ -5,76 +5,75 @@ import OpenAI from "openai";
 import { Pinecone } from "@pinecone-database/pinecone";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+	apiKey: process.env.OPENAI_API_KEY,
 });
 
 const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY,
+	apiKey: process.env.PINECONE_API_KEY,
 });
 
 const index = pinecone.Index("whop");
 
 // List of usernames to exclude from the results
 const excludedUsernames = [
-  "falcoagustin",
-  "nanzhong",
-  "hichaelmart",
-  "connordav_is",
-  "Raynos",
-  "astuyve",
-  "brandur",
-  "isukkaw",
-  "kuvos",
-  "penberg",
-  "feedthejim",
+	"falcoagustin",
+	"nanzhong",
+	"hichaelmart",
+	"connordav_is",
+	"Raynos",
+	"astuyve",
+	"brandur",
+	"isukkaw",
+	"kuvos",
+	"penberg",
+	"feedthejim",
 ];
 
 async function getEmbedding(text) {
-  try {
-    const response = await openai.embeddings.create({
-      model: "text-embedding-3-large",
-      input: text,
-    });
-    return response.data[0].embedding;
-  } catch (error) {
-    console.error("Error generating embedding:", error);
-    throw error;
-  }
+	try {
+		const response = await openai.embeddings.create({
+			model: "text-embedding-3-large",
+			input: text,
+		});
+		return response.data[0].embedding;
+	} catch (error) {
+		console.error("Error generating embedding:", error);
+		throw error;
+	}
 }
 
 async function querySimilarBios(queryText) {
-  try {
-    console.log(`Generating embedding for query: "${queryText}"`);
-    const queryEmbedding = await getEmbedding(queryText);
+	try {
+		console.log(`Generating embedding for query: "${queryText}"`);
+		const queryEmbedding = await getEmbedding(queryText);
 
-    const queryResponse = await index.namespace("x-bio").query({
-      topK: 200, // Increase topK to account for filtering
-      vector: queryEmbedding,
-      includeMetadata: true,
-      includeValues: false,
-    });
+		const queryResponse = await index.namespace("x-bio").query({
+			topK: 200, // Increase topK to account for filtering
+			vector: queryEmbedding,
+			includeMetadata: true,
+			includeValues: false,
+		});
 
-    // Filter out matches with usernames in the excluded list
-    const similarBios = queryResponse.matches
-      ?.filter(
-        (match) =>
-          match.metadata?.username &&
-          !excludedUsernames.includes(match.metadata.username),
-      )
-      .slice(0, 100) // Limit to top 100 after filtering
-      .map((match) => ({
-        username: match.metadata?.username,
-        bio: match.metadata?.text,
-        score: match.score ?? 0,
-      }));
+		// Filter out matches with usernames in the excluded list
+		const similarBios = queryResponse.matches
+			?.filter(
+				(match) =>
+					match.metadata?.username && !excludedUsernames.includes(match.metadata.username)
+			)
+			.slice(0, 100) // Limit to top 100 after filtering
+			.map((match) => ({
+				username: match.metadata?.username,
+				bio: match.metadata?.text,
+				score: match.score ?? 0,
+			}));
 
-    console.log(`Top ${similarBios?.length} similar bios:`);
-    console.log(JSON.stringify(similarBios, null, 2));
+		console.log(`Top ${similarBios?.length} similar bios:`);
+		console.log(JSON.stringify(similarBios, null, 2));
 
-    return similarBios;
-  } catch (error) {
-    console.error("Error querying similar bios:", error);
-  }
+		return similarBios;
+	} catch (error) {
+		console.error("Error querying similar bios:", error);
+	}
 }
 
 // Infrastructure-related terms
