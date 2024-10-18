@@ -1,6 +1,6 @@
 import { neonConfig, Pool } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
-import * as schema from "../server/db/schemas/users/schema";
+import * as schema from "../server/db/schema";
 import { z } from "zod";
 import { candidates, jobTitles, people, profileQueue, skills } from "@/server/db/schema";
 import {
@@ -25,7 +25,7 @@ import dotenv from "dotenv";
 import ws from "ws";
 import { jsonArrayContainsAny } from "@/lib/utils";
 import { graphql } from "@octokit/graphql";
-import { RateLimiter } from "./utils/rate-limiter";
+import { RateLimiter } from "../utils/rate-limiter";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -282,7 +282,7 @@ async function computeAverageEmbedding(embeddings: number[][]): Promise<number[]
 	}
 	const sum = embeddings.reduce(
 		(acc, curr) => acc.map((val, i) => val + curr[i]),
-		new Array(embeddings[0].length).fill(0)
+		new Array(embeddings[0]!.length).fill(0)
 	);
 	return sum.map((val) => val / embeddings.length);
 }
@@ -329,7 +329,7 @@ export async function generateMiniSummary(profileData: any) {
 	});
 
 	console.log("Mini summary generated.");
-	return completion.choices[0].message.content;
+	return completion.choices[0]!.message.content;
 }
 
 export async function gatherTopSkills(profileData: any) {
@@ -358,7 +358,7 @@ export async function gatherTopSkills(profileData: any) {
 		max_tokens: 2048,
 	});
 
-	const result = JSON.parse(completion.choices[0].message.content ?? "") as {
+	const result = JSON.parse(completion.choices[0]!.message.content ?? "") as {
 		tech: string[];
 		features: string[];
 		isEngineer: boolean;
@@ -388,7 +388,7 @@ export async function generateSummary(profileData: any) {
 		max_tokens: 2048,
 	});
 	console.log("Summary generated.");
-	return completion.choices[0].message.content;
+	return completion.choices[0]!.message.content;
 }
 
 async function processGitHubUrls(githubUrls: string[], insertId: string) {
@@ -775,7 +775,7 @@ async function processGitHubUrls(githubUrls: string[], insertId: string) {
 
 function calculateAverageEmbedding(embeddings: number[][]): number[] | null {
 	if (embeddings.length === 0) return null;
-	const length = embeddings[0].length;
+	const length = embeddings[0]!.length;
 	const sum = new Array(length).fill(0);
 	for (const emb of embeddings) {
 		for (let i = 0; i < length; i++) {

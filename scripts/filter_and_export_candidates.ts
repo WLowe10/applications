@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { parse } from "json2csv";
-import { processFilterCriteria } from "../src/find-similar-profiles-linkedin-subscriber";
+import { processFilterCriteria } from "../src/queues/find-similar-profiles-linkedin-subscriber";
 
 // Define the FilterCriteria interface
 interface FilterCriteria {

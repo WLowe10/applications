@@ -16,8 +16,9 @@ export default $config({
 				visibilityTimeout: "10 minutes",
 			}
 		);
+
 		findSimilarProfilesLinkedinQueue.subscribe({
-			handler: "src/find-similar-profiles-linkedin-subscriber.handler",
+			handler: "src/queues/find-similar-profiles-linkedin-subscriber.handler",
 			environment: SubscriberEnv,
 			memory: "10240 MB",
 			timeout: "10 minutes",

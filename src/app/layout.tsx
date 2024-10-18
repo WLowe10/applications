@@ -2,10 +2,10 @@ import { Theme } from "frosted-ui";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { LayoutProps } from "@/lib/types";
-import "frosted-ui/styles.css";
-import "./globals.css";
 import { ThemeProvider } from "./providers";
 import { TRPCReactProvider } from "@/trpc/react";
+import "frosted-ui/styles.css";
+import "./globals.css";
 
 const inter = Inter({
 	subsets: ["latin"],
