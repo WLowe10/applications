@@ -1,17 +1,7 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
+import "dotenv/config";
 import { and, eq, isNotNull, isNull } from "drizzle-orm/expressions";
-import { people } from "../server/db/schemas/users/schema";
-import dotenv from "dotenv";
-
-// Load environment variables from .env file
-dotenv.config({ path: "../.env" });
-
-// Initialize database connection
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, {
-	schema: { people },
-});
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 // Utility function to chunk an array into smaller arrays of a specified size
 function chunkArray<T>(array: T[], size: number): T[][] {
@@ -29,11 +19,11 @@ async function updateTwitterDescriptions() {
 	// Step 1: Select people where twitterData is not null
 	const peopleWithTwitterData = await db
 		.select({
-			id: people.id,
-			twitterData: people.twitterData,
+			id: schema.people.id,
+			twitterData: schema.people.twitterData,
 		})
-		.from(people)
-		.where(and(isNotNull(people.twitterData), isNull(people.twitterBio)))
+		.from(schema.people)
+		.where(and(isNotNull(schema.people.twitterData), isNull(schema.people.twitterBio)))
 		.execute();
 
 	console.log(
@@ -83,9 +73,9 @@ async function updateTwitterDescriptions() {
 				try {
 					// Update the twitterDescription column
 					await db
-						.update(people)
+						.update(schema.people)
 						.set({ twitterBio: twitterDescription })
-						.where(eq(people.id, personId));
+						.where(eq(schema.people.id, personId));
 
 					console.log(
 						`[updateTwitterDescriptions] Updated twitterDescription for person ID: ${personId}`

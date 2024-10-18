@@ -1,23 +1,8 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
+import "dotenv/config";
 import { eq, or, and, isNotNull, isNull } from "drizzle-orm/expressions";
-import { people } from "../server/db/schemas/users/schema";
-import dotenv from "dotenv";
-import OpenAI from "openai";
-
-// Load environment variables
-dotenv.config({ path: "../.env" });
-
-// Initialize OpenAI with API key
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY!,
-});
-
-// Initialize the database connection
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, {
-	schema: { people },
-});
+import { openai } from "../lib/clients";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 // Utility function to chunk an array into smaller arrays of a specified size
 function chunkArray<T>(array: T[], size: number): T[][] {
@@ -48,7 +33,7 @@ async function askCondition(condition: string): Promise<boolean> {
 		max_tokens: 256,
 	});
 
-	const result = JSON.parse(completion.choices[0].message.content ?? '{ "condition": false }')
+	const result = JSON.parse(completion.choices[0]!.message.content ?? '{ "condition": false }')
 		.condition as boolean;
 
 	return result;
@@ -61,12 +46,12 @@ async function updateBigTechStatus() {
 	// Step 1: Select people who have `workedInBigTech` set to false and have either `twitterBio`, `organizations`, or `linkedinData`
 	const peopleToProcess = await db
 		.select()
-		.from(people)
+		.from(schema.people)
 		.where(
 			and(
-				eq(people.workedInBigTech, false),
-				or(isNotNull(people.twitterBio), isNotNull(people.organizations)),
-				isNull(people.linkedinData)
+				eq(schema.people.workedInBigTech, false),
+				or(isNotNull(schema.people.twitterBio), isNotNull(schema.people.organizations)),
+				isNull(schema.people.linkedinData)
 			)
 		);
 
@@ -120,9 +105,9 @@ async function updateBigTechStatus() {
 				if (workedInBigTech) {
 					try {
 						await db
-							.update(people)
+							.update(schema.people)
 							.set({ workedInBigTech: true })
-							.where(eq(people.id, personId));
+							.where(eq(schema.people.id, personId));
 						console.log(
 							`[updateBigTechStatus] Updated workedInBigTech for person ID: ${personId}`
 						);

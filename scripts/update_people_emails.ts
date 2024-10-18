@@ -1,15 +1,7 @@
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import * as schema from "../server/db/schemas/users/schema";
+import "dotenv/config";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
-import dotenv from "dotenv";
-
-dotenv.config({ path: "../.env" });
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-export const db = drizzle(pool, {
-	schema,
-});
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 async function main() {
 	try {

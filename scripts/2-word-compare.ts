@@ -1,13 +1,5 @@
-import { OpenAI } from "openai";
-import dotenv from "dotenv";
-
-// Load environment variables
-dotenv.config({ path: "../.env" });
-
-// Initialize OpenAI with API key
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY!,
-});
+import "dotenv/config";
+import { openai } from "../lib/clients";
 
 // Utility function to add generic context to the input text
 function enrichText(text: string): string {
@@ -18,7 +10,7 @@ function enrichText(text: string): string {
 
 // Utility function to calculate cosine similarity
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
-	const dotProduct = vecA.reduce((sum, a, idx) => sum + a * vecB[idx], 0);
+	const dotProduct = vecA.reduce((sum, a, idx) => sum + a * vecB[idx]!, 0);
 	const magnitudeA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
 	const magnitudeB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
 	return magnitudeA && magnitudeB ? dotProduct / (magnitudeA * magnitudeB) : 0;
@@ -44,7 +36,7 @@ async function getEmbedding(text: string) {
 		input: text,
 	});
 
-	return response.data[0].embedding;
+	return response.data[0]!.embedding;
 }
 
 // Compare example texts

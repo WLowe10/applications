@@ -1,16 +1,8 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { eq, and, isNotNull, ne, isNull } from "drizzle-orm";
+import "dotenv/config";
 import axios from "axios";
-import dotenv from "dotenv";
-
-dotenv.config({ path: "../.env" });
-
-// Import the schema (adjust the import path as needed)
-import * as schema from "../server/db/schemas/users/schema";
-import { Pool } from "@neondatabase/serverless";
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, { schema });
+import { eq, and, isNotNull, ne, isNull } from "drizzle-orm";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 interface WhopResponse {
 	is_user: boolean;
@@ -74,8 +66,6 @@ async function updateWhopStatus() {
 		console.log("Finished updating Whop statuses.");
 	} catch (error) {
 		console.error("Error updating Whop statuses:", error);
-	} finally {
-		await pool.end();
 	}
 }
 

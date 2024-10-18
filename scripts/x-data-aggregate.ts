@@ -1,5 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
+import "dotenv/config";
 
 export async function resolveTcoLink(url: string): Promise<string> {
 	try {

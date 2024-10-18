@@ -1,28 +1,13 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
-import * as schema from "../server/db/schemas/users/schema.js";
-import dotenv from "dotenv";
-import { inArray, eq, and, or, gt, asc } from "drizzle-orm";
+import "dotenv/config";
 import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+import { dirname } from "path";
+import { db } from "../server/db";
+import { openai, pinecone } from "../lib/clients";
+import { inArray, eq, and, or, gt, asc } from "drizzle-orm";
+import * as schema from "../server/db/schema";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-dotenv.config({ path: join(__dirname, "../.env") });
-
-const connection = neon(process.env.DB_URL);
-const db = drizzle(connection, { schema });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
-const pinecone = new Pinecone({
-	apiKey: process.env.PINECONE_API_KEY,
-});
 
 const index = pinecone.Index("whop");
 
@@ -115,6 +100,7 @@ export async function getEmbedding(text) {
 			input: text,
 			encoding_format: "float",
 		});
+
 		return response.data[0].embedding;
 	} catch (error) {
 		console.error("Error getting embedding:", error);

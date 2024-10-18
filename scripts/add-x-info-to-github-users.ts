@@ -1,16 +1,8 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
-
-import * as schema from "@/server/db/schemas/users/schema";
+import "dotenv/config";
 import fetch from "node-fetch";
 import { isNotNull, eq, or, isNull, and } from "drizzle-orm";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-export const db = drizzle(pool, {
-	schema,
-});
+import { db } from "../server/db";
+import * as schema from "@/server/db/schema";
 
 async function updateTwitterData() {
 	try {

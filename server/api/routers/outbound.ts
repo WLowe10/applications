@@ -1,19 +1,14 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { candidates, company as companyTable } from "@/server/db/schemas/users/schema";
-import * as schema from "@/server/db/schemas/users/schema";
-//@ts-ignore
-import { v4 as uuid } from "uuid";
-import OpenAI from "openai";
-import { and, desc, eq, exists, inArray, InferSelectModel, isNotNull, or } from "drizzle-orm";
+import { and, eq, exists, inArray, isNotNull, or } from "drizzle-orm";
 import { InferResultType } from "@/utils/infer";
 import { jsonArrayContainsAny } from "@/lib/utils";
-import { Pinecone } from "@pinecone-database/pinecone";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { Resource } from "sst";
 import { parse } from "json2csv";
 import { TRPCError } from "@trpc/server";
 import { openai, pinecone } from "@/lib/clients";
+import * as schema from "@/server/db/schema";
 
 async function getEmbedding(text: string) {
 	const response = await openai.embeddings.create({
@@ -22,7 +17,7 @@ async function getEmbedding(text: string) {
 		encoding_format: "float",
 	});
 
-	return response.data[0].embedding;
+	return response.data[0]!.embedding;
 }
 
 const index = pinecone.Index("whop");
@@ -304,11 +299,11 @@ export const outboundRouter = createTRPCRouter({
 							exists(
 								ctx.db
 									.select()
-									.from(companyTable)
+									.from(schema.company)
 									.where(
 										and(
-											inArray(companyTable.id, input.companyIds),
-											eq(candidate.companyId, companyTable.id)
+											inArray(schema.company.id, input.companyIds),
+											eq(candidate.companyId, schema.company.id)
 										)
 									)
 							),
@@ -335,7 +330,7 @@ export const outboundRouter = createTRPCRouter({
 					topCandidates.map(async (candidate) => {
 						try {
 							const candidateDB = await ctx.db.query.candidates.findFirst({
-								where: eq(candidates.id, candidate.id),
+								where: eq(schema.candidates.id, candidate.id),
 							});
 							if (!candidateDB?.cookdReviewed) {
 								// const response = await fetch("https://cookd.dev/api/score", {
@@ -390,7 +385,10 @@ export const outboundRouter = createTRPCRouter({
 			const companies = await ctx.db.query.company.findMany({
 				where: (company, { exists, eq }) =>
 					exists(
-						ctx.db.select().from(candidates).where(eq(candidates.companyId, company.id))
+						ctx.db
+							.select()
+							.from(schema.candidates)
+							.where(eq(schema.candidates.companyId, company.id))
 					),
 			});
 
@@ -426,7 +424,7 @@ Respond only with a JSON object that has four fields: "standardizedTechs", "stan
 				max_tokens: 1024,
 			});
 
-			const standardizedResponse = JSON.parse(completion.choices[0].message.content ?? "{}");
+			const standardizedResponse = JSON.parse(completion.choices[0]!.message.content ?? "{}");
 
 			console.log("Standardized response:", JSON.stringify(standardizedResponse, null, 2));
 
@@ -451,7 +449,7 @@ Respond only with a JSON object that has four fields: "standardizedTechs", "stan
 			];
 
 			const companiesDB = await ctx.db.query.company.findMany({
-				where: inArray(companyTable.name, standardizedResponse.companyNames),
+				where: inArray(schema.company.name, standardizedResponse.companyNames),
 			});
 
 			if (
@@ -591,7 +589,7 @@ Respond only with a JSON object that has four fields: "standardizedTechs", "stan
 			}
 
 			// Sort matching companies by score
-			matchingCompanies.sort((a, b) => companyScores[b.id] - companyScores[a.id]);
+			matchingCompanies.sort((a, b) => companyScores[b.id]! - companyScores[a.id]!);
 
 			console.log(
 				"Matching companies:",
@@ -682,7 +680,7 @@ If no company they mentioned is in the list, return an empty array for "companyN
 
 				// Parse the responses
 				const response = JSON.parse(
-					firstCompletion.choices[0].message.content ??
+					firstCompletion.choices[0]!.message.content ??
 						`{
             "valid": false,
             "message": "No response",
@@ -703,7 +701,7 @@ If no company they mentioned is in the list, return an empty array for "companyN
 
 				// Fetch companies from the database based on the extracted company names
 				const companiesDB = await ctx.db.query.company.findMany({
-					where: inArray(companyTable.name, responseCompanyNames),
+					where: inArray(schema.company.name, responseCompanyNames),
 				});
 
 				if (!companiesDB || companiesDB.length === 0) {
@@ -746,7 +744,10 @@ If no company they mentioned is in the list, return an empty array for "companyN
 		const companies = await ctx.db.query.company.findMany({
 			where: (company, { exists, eq }) =>
 				exists(
-					ctx.db.select().from(candidates).where(eq(candidates.companyId, company.id))
+					ctx.db
+						.select()
+						.from(schema.candidates)
+						.where(eq(schema.candidates.companyId, company.id))
 				),
 		});
 
@@ -761,13 +762,13 @@ If no company they mentioned is in the list, return an empty array for "companyN
 		.input(z.object({ ids: z.array(z.string()) }))
 		.mutation(async ({ ctx, input }) => {
 			const candidatesFiltered = await ctx.db.query.candidates.findMany({
-				where: inArray(candidates.id, input.ids),
+				where: inArray(schema.candidates.id, input.ids),
 			});
 			await Promise.all(
 				candidatesFiltered.map(async (candidate) => {
 					try {
 						const candidateDB = await ctx.db.query.candidates.findFirst({
-							where: eq(candidates.id, candidate.id),
+							where: eq(schema.candidates.id, candidate.id),
 						});
 						if (!candidateDB?.cookdReviewed) {
 							// const response = await fetch("https://cookd.dev/api/score", {

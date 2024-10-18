@@ -1,16 +1,5 @@
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
-import dotenv from "dotenv";
-
-dotenv.config({ path: "../../.env" });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
-const pinecone = new Pinecone({
-	apiKey: process.env.PINECONE_API_KEY || "",
-});
+import "dotenv/config";
+import { pinecone, openai } from "../lib/clients";
 
 const index = pinecone.Index("whop");
 
@@ -30,21 +19,25 @@ async function querySimilarTechnologies(skill) {
 		const skillEmbedding = await getEmbedding(skill);
 
 		const queryResponse = await index.namespace("technologies").query({
-			topK: 20,
+			topK: 200,
 			vector: skillEmbedding,
 			includeMetadata: true,
 			includeValues: false,
 		});
 
-		console.log("Top 10 similar technologies:");
-		queryResponse.matches.forEach((match, index) => {
-			console.log(`${index + 1}: ${match.metadata?.technology} (Score: ${match.score})`);
-		});
+		const similarTechnologies = queryResponse.matches
+			.filter((match) => (match.score ?? 0) > 0.7)
+			.map((match) => ({
+				technology: match.metadata?.technology,
+				score: match.score ?? 0,
+			}));
+		console.log(JSON.stringify(similarTechnologies, null, 2));
+		return similarTechnologies;
 	} catch (error) {
 		console.error("Error querying similar technologies:", error);
 	}
 }
 
-querySimilarTechnologies("Rust");
+querySimilarTechnologies("Next.js");
 
 export { querySimilarTechnologies };

@@ -1,26 +1,10 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import dotenv from "dotenv";
-import { eq, gt, or, and, asc } from "drizzle-orm";
-import OpenAI from "openai";
-import * as userSchema from "../server/db/schemas/users/schema";
+import "dotenv/config";
 import fs from "fs";
 import path from "path";
-
-dotenv.config({
-	path: "../.env",
-});
-
-const connection = neon(process.env.DB_URL!);
-const db = drizzle(connection, {
-	schema: {
-		...userSchema,
-	},
-});
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
+import { eq, gt, or, and, asc } from "drizzle-orm";
+import { openai } from "../lib/clients";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 const companies = [
 	// {
@@ -179,16 +163,16 @@ async function fetchCandidatesWithCursor(
 		const candidates = await db.query.candidates.findMany({
 			where: cursor
 				? and(
-						eq(userSchema.candidates.companyId, company.id),
+						eq(schema.candidates.companyId, company.id),
 						or(
-							gt(userSchema.candidates.createdAt, cursor.createdAt),
+							gt(schema.candidates.createdAt, cursor.createdAt),
 							and(
-								eq(userSchema.candidates.createdAt, cursor.createdAt),
-								gt(userSchema.candidates.id, cursor.id)
+								eq(schema.candidates.createdAt, cursor.createdAt),
+								gt(schema.candidates.id, cursor.id)
 							)
 						)
 					)
-				: eq(userSchema.candidates.companyId, company.id),
+				: eq(schema.candidates.companyId, company.id),
 			limit: limit,
 			orderBy: (candidates) => [asc(candidates.createdAt), asc(candidates.id)],
 		});
@@ -215,8 +199,8 @@ async function fetchAllCandidates(company: any) {
 
 		allCandidates = allCandidates.concat(candidates);
 		lastCursor = {
-			id: candidates[candidates.length - 1].id,
-			createdAt: candidates[candidates.length - 1].createdAt!,
+			id: candidates[candidates.length - 1]!.id,
+			createdAt: candidates[candidates.length - 1]!.createdAt!,
 		};
 
 		console.log(`Updated cursor for ${company.name}: ${JSON.stringify(lastCursor)}`);
@@ -296,7 +280,7 @@ Here are the positions to evaluate: ${condition}`,
 		});
 
 		const result = JSON.parse(
-			completion.choices[0].message.content ?? '{ "condition": false }'
+			completion.choices[0]!.message.content ?? '{ "condition": false }'
 		);
 		console.log(`OpenAI response for ${company.name}:`, result);
 		return result.condition;

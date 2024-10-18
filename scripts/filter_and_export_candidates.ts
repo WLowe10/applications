@@ -2,14 +2,6 @@ import fs from "fs";
 import path from "path";
 import { parse } from "json2csv";
 import { processFilterCriteria } from "../src/find-similar-profiles-linkedin-subscriber";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import * as schema from "../server/db/schemas/users/schema";
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-export const db = drizzle(pool, {
-	schema,
-});
 
 // Define the FilterCriteria interface
 interface FilterCriteria {

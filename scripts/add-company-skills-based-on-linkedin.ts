@@ -1,24 +1,8 @@
-import OpenAI from "openai";
-import dotenv from "dotenv";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { company as companyTable } from "../server/db/schemas/users/schema";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import "dotenv/config";
 import { eq } from "drizzle-orm";
-
-dotenv.config({ path: "../.env" });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
-const connection = neon(process.env.DB_URL!);
-
-const db = drizzle(connection, {
-	schema: {
-		...userSchema,
-	},
-});
+import { openai } from "../lib/clients";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 export const getTopFeatures = async (query: string) => {
 	const completion = await openai.chat.completions.create({
@@ -43,7 +27,7 @@ Return a JSON object with two attributes: "specialties" and "technicalFeatures".
 	});
 
 	const response = JSON.parse(
-		completion.choices[0].message.content ?? "{specialties: [], technicalFeatures: []}"
+		completion.choices[0]!.message.content ?? "{specialties: [], technicalFeatures: []}"
 	);
 	return response as { specialties: string[]; technicalFeatures: string[] };
 };
@@ -63,12 +47,12 @@ const main = async () => {
 		);
 
 		await db
-			.update(companyTable)
+			.update(schema.company)
 			.set({
 				specialties: specialtiesObj.specialties,
 				topFeatures: specialtiesObj.technicalFeatures,
 			})
-			.where(eq(companyTable.id, company.id));
+			.where(eq(schema.company.id, company.id));
 	});
 
 	await Promise.all(updatePromises);

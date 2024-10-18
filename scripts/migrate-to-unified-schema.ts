@@ -1,27 +1,9 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
+import "dotenv/config";
 import { eq, or } from "drizzle-orm/expressions";
-import {
-	people,
-	candidates,
-	githubUsers,
-	jobTitles,
-	skills,
-} from "../server/db/schemas/users/schema";
-import dotenv from "dotenv";
-import OpenAI from "openai";
-import * as schema from "../server/db/schemas/users/schema";
-
-dotenv.config({ path: "../.env" });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, {
-	schema,
-});
+import { people, candidates, githubUsers, jobTitles, skills } from "../server/db/schema";
+import * as schema from "../server/db/schema";
+import { db } from "../server/db";
+import { openai } from "../lib/clients";
 
 const API_KEY = process.env.SOCIAL_DATA_API_KEY;
 
@@ -67,7 +49,7 @@ async function getEmbedding(text: string): Promise<number[]> {
 		throw new Error("No embedding returned from OpenAI API");
 	}
 
-	return response.data[0].embedding;
+	return response.data[0]!.embedding;
 }
 
 /**

@@ -1,10 +1,7 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
-import * as schema from "../server/db/schemas/users/schema";
+import "dotenv/config";
 import { eq } from "drizzle-orm";
-import dotenv from "dotenv";
-
-dotenv.config({ path: "../.env" });
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 const API_KEY = process.env.SOCIAL_DATA_API_KEY;
 const DB_URL = process.env.DB_URL;
@@ -12,11 +9,6 @@ const DB_URL = process.env.DB_URL;
 if (!API_KEY || !DB_URL) {
 	throw new Error("API_KEY and DB_URL are required in .env file");
 }
-
-const pool = new Pool({ connectionString: DB_URL });
-const db = drizzle(pool, {
-	schema,
-});
 
 type Follows = {
 	id_str: string;
@@ -118,7 +110,8 @@ async function insertFollowers(accountId: string, followers: Follows) {
 async function insertFollowing(accountId: string, following: Follows) {
 	console.log(`Inserting ${following.length} following for account ${accountId}`);
 	for (let i = 0; i < following.length; i++) {
-		const followee = following[i];
+		const followee = following[i]!;
+
 		await db
 			.insert(schema.whopTwitterFollowing)
 			.values({

@@ -1,25 +1,8 @@
-import * as dotenv from "dotenv";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
-import { and, eq, inArray, isNotNull } from "drizzle-orm";
-
-dotenv.config({ path: "../.env" });
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-export const db = drizzle(pool, {
-	schema: userSchema,
-});
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY!,
-});
-
-const pinecone = new Pinecone({
-	apiKey: process.env.PINECONE_API_KEY!,
-});
+import "dotenv/config";
+import { and, eq, isNotNull } from "drizzle-orm";
+import { openai, pinecone } from "../lib/clients";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 const index = pinecone.Index("whop");
 
@@ -139,7 +122,7 @@ async function getEmbedding(text: string): Promise<number[]> {
 			model: "text-embedding-3-large",
 			input: text,
 		});
-		return response.data[0].embedding;
+		return response.data[0]!.embedding;
 	} catch (error) {
 		console.error("Error generating embedding:", error);
 		throw error;
@@ -190,11 +173,11 @@ async function searchAndScoreCandidates() {
 
 		const users = await db
 			.select()
-			.from(userSchema.githubUsers)
+			.from(schema.githubUsers)
 			.where(
 				and(
-					isNotNull(userSchema.githubUsers.twitterBio),
-					eq(userSchema.githubUsers.isUpsertedInAllBios, true)
+					isNotNull(schema.githubUsers.twitterBio),
+					eq(schema.githubUsers.isUpsertedInAllBios, true)
 				)
 			);
 

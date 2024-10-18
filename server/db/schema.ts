@@ -1,4 +1,3 @@
-import { all } from "axios";
 import { relations } from "drizzle-orm";
 import {
 	boolean,
@@ -6,14 +5,12 @@ import {
 	integer,
 	json,
 	jsonb,
-	pgEnum,
 	pgTable,
 	real,
 	serial,
 	text,
 	timestamp,
 	unique,
-	uniqueIndex,
 	varchar,
 	vector,
 } from "drizzle-orm/pg-core";

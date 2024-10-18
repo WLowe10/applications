@@ -1,22 +1,9 @@
-import OpenAI from "openai";
-import dotenv from "dotenv";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { neon, Pool } from "@neondatabase/serverless";
-import { eq, isNotNull, isNull } from "drizzle-orm";
+import "dotenv/config";
+import { eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-serverless";
-
-dotenv.config({ path: "../.env" });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, {
-	schema: {
-		...userSchema,
-	},
-});
+import { openai } from "../lib/clients";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 export async function getNormalizedLocation(location: string): Promise<string> {
 	try {
@@ -47,7 +34,7 @@ Examples:
 			max_tokens: 256,
 		});
 
-		return completion.choices[0].message.content?.trim().toUpperCase() || "UNKNOWN";
+		return completion.choices[0]!.message.content?.trim().toUpperCase() || "UNKNOWN";
 	} catch (error) {
 		console.error(`Error normalizing location for "${location}":`, error);
 		return "UNKNOWN";
@@ -83,7 +70,7 @@ Examples:
 			max_tokens: 256,
 		});
 
-		return completion.choices[0].message.content?.trim().toUpperCase() || "UNKNOWN";
+		return completion.choices[0]!.message.content?.trim().toUpperCase() || "UNKNOWN";
 	} catch (error) {
 		console.error(`Error normalizing country for "${location}":`, error);
 		return "UNKNOWN";
@@ -92,7 +79,7 @@ Examples:
 
 async function updateUserLocations() {
 	const users = await db.query.githubUsers.findMany({
-		where: isNull(userSchema.githubUsers.normalizedLocation),
+		where: isNull(schema.githubUsers.normalizedLocation),
 	});
 
 	console.log(`Found ${users.length} users with non-null locations.`);
@@ -103,16 +90,16 @@ async function updateUserLocations() {
 			const normalizedLocation = await getNormalizedLocation(user.location);
 
 			await db
-				.update(userSchema.githubUsers)
+				.update(schema.githubUsers)
 				.set({ normalizedLocation })
-				.where(eq(userSchema.githubUsers.id, user.id));
+				.where(eq(schema.githubUsers.id, user.id));
 
 			console.log(`Updated ${user.login}: ${user.location} -> ${normalizedLocation}`);
 		} else {
 			await db
-				.update(userSchema.githubUsers)
+				.update(schema.githubUsers)
 				.set({ normalizedLocation: "UNDEFINED" })
-				.where(eq(userSchema.githubUsers.id, user.id));
+				.where(eq(schema.githubUsers.id, user.id));
 		}
 	}
 }

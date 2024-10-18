@@ -1,23 +1,8 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
-import * as schema from "../server/db/schemas/users/schema";
-import dotenv from "dotenv";
+import "dotenv/config";
 import { eq } from "drizzle-orm";
-
-dotenv.config({ path: "../.env" });
-
-const connection = neon(process.env.DB_URL!);
-const db = drizzle(connection, { schema });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
-const pinecone = new Pinecone({
-	apiKey: "fa3798aa-083f-4c82-86d9-c77cf19f2d3a",
-});
+import { pinecone, openai } from "../lib/clients";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 const index = pinecone.Index("whop");
 
@@ -27,7 +12,8 @@ async function getEmbedding(text: string) {
 		input: text,
 		encoding_format: "float",
 	});
-	return response.data[0].embedding;
+
+	return response.data[0]!.embedding;
 }
 
 async function computeAndStoreJobTitleAverages() {
@@ -52,8 +38,10 @@ async function computeAndStoreJobTitleAverages() {
 		const jobTitleEmbeddings = await Promise.all(jobTitles.map(getEmbedding));
 		const averageEmbedding = jobTitleEmbeddings.reduce(
 			(acc, embedding) =>
-				acc.map((val: number, i: number) => val + embedding[i] / jobTitleEmbeddings.length),
-			new Array(jobTitleEmbeddings[0].length).fill(0)
+				acc.map(
+					(val: number, i: number) => val + embedding[i]! / jobTitleEmbeddings.length
+				),
+			new Array(jobTitleEmbeddings[0]!.length).fill(0)
 		);
 
 		await index.namespace("candidate-job-title-average").upsert([

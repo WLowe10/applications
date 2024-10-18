@@ -1,13 +1,7 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import "dotenv/config";
 import { eq, inArray } from "drizzle-orm";
-import * as userSchema from "../server/db/schemas/users/schema";
-import dotenv from "dotenv";
-
-dotenv.config({ path: "../.env" });
-
-const connection = neon(process.env.DB_URL!);
-const db = drizzle(connection, { schema: userSchema });
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 async function updateCandidateCompanyIds() {
 	const batchSize = 500;
@@ -19,7 +13,7 @@ async function updateCandidateCompanyIds() {
 		// Fetch candidates in batches
 		const candidates = await db
 			.select()
-			.from(userSchema.candidates)
+			.from(schema.candidates)
 			.limit(batchSize)
 			.offset(offset);
 
@@ -41,9 +35,9 @@ async function updateCandidateCompanyIds() {
 
 			// Find matching companies
 			const matchingCompanies = await db
-				.select({ id: userSchema.company.id })
-				.from(userSchema.company)
-				.where(inArray(userSchema.company.linkedinUrl, companyLinkedInUrls));
+				.select({ id: schema.company.id })
+				.from(schema.company)
+				.where(inArray(schema.company.linkedinUrl, companyLinkedInUrls));
 
 			const companyIds = matchingCompanies.map((company) => company.id);
 
@@ -76,9 +70,9 @@ async function updateCandidateCompanyIds() {
 async function performBatchUpdate(updates: { id: string; companyIds: string[] }[]) {
 	const updatePromises = updates.map((update) =>
 		db
-			.update(userSchema.candidates)
+			.update(schema.candidates)
 			.set({ companyIds: update.companyIds })
-			.where(eq(userSchema.candidates.id, update.id))
+			.where(eq(schema.candidates.id, update.id))
 	);
 
 	await Promise.all(updatePromises);

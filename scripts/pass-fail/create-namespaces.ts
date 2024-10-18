@@ -1,17 +1,7 @@
-import { Pinecone } from "@pinecone-database/pinecone";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import * as schema from "../../server/db/schemas/users/schema";
-import dotenv from "dotenv";
-
-dotenv.config({ path: "../../.env" });
-
-const pinecone = new Pinecone({
-	apiKey: process.env.WHOP_PINECONE_API_KEY || "",
-});
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, { schema });
+import "dotenv/config";
+import { pinecone } from "@/lib/clients";
+import { db } from "../../server/db";
+import * as schema from "../../server/db/schema";
 
 const index = pinecone.Index("job-passes-linkedin");
 
@@ -54,7 +44,6 @@ async function upsertJobVectors() {
 
 async function main() {
 	await upsertJobVectors();
-	await pool.end();
 }
 
 main().then(() => console.log("Process completed"));

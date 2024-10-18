@@ -1,23 +1,8 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
-import * as schema from "../server/db/schemas/users/schema";
-import dotenv from "dotenv";
+import "dotenv/config";
 import { and, asc, eq, gt, or } from "drizzle-orm";
-
-dotenv.config({ path: "../.env" });
-
-const connection = neon(process.env.DB_URL!);
-const db = drizzle(connection, { schema });
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
-const pinecone = new Pinecone({
-	apiKey: "fa3798aa-083f-4c82-86d9-c77cf19f2d3a",
-});
+import { db } from "../server/db";
+import { openai, pinecone } from "../lib/clients";
+import * as schema from "../server/db/schema";
 
 const index = pinecone.Index("whop");
 
@@ -27,7 +12,7 @@ async function getEmbedding(text: string) {
 		input: text,
 		encoding_format: "float",
 	});
-	return response.data[0].embedding;
+	return response.data[0]!.embedding;
 }
 
 async function fetchCandidatesWithCursor(cursor: { id: string; createdAt: Date }) {
@@ -73,8 +58,8 @@ async function fetchAllCandidates() {
 
 		allCandidates = allCandidates.concat(candidates);
 		lastCursor = {
-			id: candidates[candidates.length - 1].id,
-			createdAt: candidates[candidates.length - 1].createdAt!,
+			id: candidates[candidates.length - 1]!.id,
+			createdAt: candidates[candidates.length - 1]!.createdAt!,
 		};
 	}
 

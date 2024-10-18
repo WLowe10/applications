@@ -1,24 +1,14 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { neon, Pool } from "@neondatabase/serverless";
-import * as schema from "../server/db/schemas/users/schema";
-import dotenv from "dotenv";
+import "dotenv/config";
 import { InferSelectModel } from "drizzle-orm";
 import { graphql } from "@octokit/graphql";
 import { eq } from "drizzle-orm";
 import { RateLimiter } from "@/github/graphql";
 import { getNormalizedLocation } from "./normalized-location-github";
-
-dotenv.config({ path: "../.env" });
-
-const pool = new Pool({ connectionString: process.env.DB_URL! });
-const db = drizzle(pool, { schema });
+import { db } from "../server/db";
+import { env } from "../lib/env";
+import * as schema from "../server/db/schema";
 
 type GitHubUser = InferSelectModel<typeof schema.githubUsers>;
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-if (!GITHUB_TOKEN) {
-	throw new Error("GitHub token is required in .env file");
-}
 
 const rateLimiter = new RateLimiter();
 
@@ -138,7 +128,7 @@ export async function fetchUserFromGitHub(username: string): Promise<GitHubUser 
 				query,
 				login: username,
 				headers: {
-					authorization: `Bearer ${GITHUB_TOKEN}`,
+					authorization: `Bearer ${env.GITHUB_TOKEN}`,
 				},
 			});
 		});

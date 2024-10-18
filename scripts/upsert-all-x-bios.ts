@@ -1,25 +1,8 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
-
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
-import * as schema from "@/server/db/schemas/users/schema";
+import "dotenv/config";
 import { isNotNull, eq, or, isNull, and, inArray } from "drizzle-orm";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-export const db = drizzle(pool, {
-	schema,
-});
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY!,
-});
-
-const pinecone = new Pinecone({
-	apiKey: process.env.PINECONE_API_KEY!,
-});
+import { pinecone, openai } from "@/lib/clients";
+import { db } from "@/server/db";
+import * as schema from "@/server/db/schema";
 
 const index = pinecone.Index("whop");
 
@@ -29,7 +12,7 @@ async function getEmbedding(text: string): Promise<number[]> {
 			model: "text-embedding-3-large",
 			input: text,
 		});
-		return response.data[0].embedding;
+		return response.data[0]!.embedding;
 	} catch (error) {
 		console.error("Error generating embedding:", error);
 		throw error;

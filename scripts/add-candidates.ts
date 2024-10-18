@@ -1,30 +1,12 @@
-import { Pinecone } from "@pinecone-database/pinecone";
-import OpenAI from "openai";
+import "dotenv/config";
 import axios from "axios";
-import * as schema from "../server/db/schemas/users/schema";
-//@ts-ignore
 import { v4 as uuid } from "uuid";
-import dotenv from "dotenv";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
 import { and, eq, isNotNull, ne, not, exists, inArray } from "drizzle-orm";
-
-dotenv.config({ path: "../.env" });
-
-const pinecone = new Pinecone({
-	apiKey: process.env.PINECONE_API_KEY || "",
-});
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY!,
-});
+import { db } from "../server/db";
+import { openai, pinecone } from "../lib/clients";
+import * as schema from "../server/db/schema";
 
 const index = pinecone.Index("whop");
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-export const db = drizzle(pool, {
-	schema,
-});
 
 async function getEmbedding(text: string) {
 	const response = await openai.embeddings.create({
@@ -33,7 +15,7 @@ async function getEmbedding(text: string) {
 		encoding_format: "float",
 	});
 
-	return response.data[0].embedding;
+	return response.data[0]!.embedding;
 }
 
 async function scrapeLinkedInProfile(linkedinUrl: string) {
@@ -78,7 +60,7 @@ async function generateMiniSummary(profileData: any) {
 	});
 
 	console.log("Mini summary generated.");
-	return completion.choices[0].message.content;
+	return completion.choices[0]!.message.content;
 }
 
 async function gatherTopSkills(profileData: any) {
@@ -107,7 +89,7 @@ async function gatherTopSkills(profileData: any) {
 		max_tokens: 2048,
 	});
 
-	const result = JSON.parse(completion.choices[0].message.content ?? "") as {
+	const result = JSON.parse(completion.choices[0]!.message.content ?? "") as {
 		tech: string[];
 		features: string[];
 		isEngineer: boolean;
@@ -136,7 +118,7 @@ async function askCondition(condition: string) {
 		max_tokens: 256,
 	});
 
-	const result = JSON.parse(completion.choices[0].message.content ?? '{ "condition": false }')
+	const result = JSON.parse(completion.choices[0]!.message.content ?? '{ "condition": false }')
 		.condition as boolean;
 
 	return result;
@@ -162,7 +144,7 @@ async function generateSummary(profileData: any) {
 		max_tokens: 2048,
 	});
 	console.log("Summary generated.");
-	return completion.choices[0].message.content;
+	return completion.choices[0]!.message.content;
 }
 
 async function upsertToVectorDB(
@@ -202,8 +184,8 @@ async function computeAndStoreAverage(
 
 	const embeddings = await Promise.all(items.map(getEmbedding));
 	const averageEmbedding = embeddings.reduce(
-		(acc, embedding) => acc.map((val, i) => val + embedding[i] / embeddings.length),
-		new Array(embeddings[0].length).fill(0)
+		(acc, embedding) => acc.map((val, i) => val + embedding[i]! / embeddings.length),
+		new Array(embeddings[0]!.length).fill(0)
 	);
 
 	await index.namespace(namespace).upsert([
@@ -330,7 +312,7 @@ function validateAndNormalizeLinkedInUrl(url: string): string | null {
 
 		let [, protocol, hostname, pathname] = match;
 
-		if (!hostname.endsWith("linkedin.com")) {
+		if (!hostname?.endsWith("linkedin.com")) {
 			return null;
 		}
 

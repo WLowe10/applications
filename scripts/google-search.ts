@@ -1,30 +1,14 @@
+import "dotenv/config";
 import axios from "axios";
-import dotenv from "dotenv";
-// @ts-ignore
 import { v4 as uuid } from "uuid";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
 import { eq, inArray, or } from "drizzle-orm";
-import OpenAI from "openai";
-
-dotenv.config({
-	path: "../.env",
-});
-
-const connection = neon(process.env.DB_URL!);
-const db = drizzle(connection, {
-	schema: {
-		...userSchema,
-	},
-});
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
+import { openai } from "../lib/clients";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 export const generateSummary = async (profileData: any) => {
 	console.log("Generating summary for profile data...");
+
 	const completion = await openai.chat.completions.create({
 		messages: [
 			{
@@ -43,7 +27,8 @@ export const generateSummary = async (profileData: any) => {
 		max_tokens: 2048,
 	});
 	console.log("Summary generated.");
-	return completion.choices[0].message.content;
+
+	return completion.choices[0]!.message.content;
 };
 
 export const googleSearch = async (query: string) => {
@@ -111,7 +96,7 @@ const checkCompanyMatch = async (profileData: any) => {
 	companiesWorkedAt = companiesWorkedAt.length > 0 ? companiesWorkedAt : [""];
 
 	const storedCompanyWorkedAt = await db.query.company.findFirst({
-		where: inArray(userSchema.company.linkedinId, companiesWorkedAt),
+		where: inArray(schema.company.linkedinId, companiesWorkedAt),
 	});
 
 	if (storedCompanyWorkedAt) {
@@ -142,7 +127,7 @@ const askCondition = async (condition: string) => {
 		max_tokens: 256,
 	});
 
-	const result = JSON.parse(completion.choices[0].message.content ?? '{ "condition": false }')
+	const result = JSON.parse(completion.choices[0]!.message.content ?? '{ "condition": false }')
 		.condition as boolean;
 
 	return result;
@@ -169,7 +154,7 @@ const generateMiniSummary = async (profileData: any) => {
 	});
 
 	console.log("Mini summary generated.");
-	return completion.choices[0].message.content;
+	return completion.choices[0]!.message.content;
 };
 
 const gatherTopSkills = async (profileData: any) => {
@@ -201,7 +186,7 @@ const gatherTopSkills = async (profileData: any) => {
 		max_tokens: 2048,
 	});
 
-	const result = JSON.parse(completion.choices[0].message.content ?? "") as {
+	const result = JSON.parse(completion.choices[0]!.message.content ?? "") as {
 		tech: string[];
 		features: string[];
 		isEngineer: boolean;
@@ -213,7 +198,7 @@ const gatherTopSkills = async (profileData: any) => {
 
 const insertCandidate = async (profileData: any, companyId?: string) => {
 	const existingCandidate = await db.query.candidates.findFirst({
-		where: eq(userSchema.candidates.url, profileData.linkedInUrl),
+		where: eq(schema.candidates.url, profileData.linkedInUrl),
 	});
 	if (existingCandidate) {
 		console.log(`Candidate already exists in the database: ${profileData.linkedInUrl}`);
@@ -245,7 +230,7 @@ const insertCandidate = async (profileData: any, companyId?: string) => {
 	const summary = await generateSummary(profileData);
 
 	const candidateId = uuid();
-	await db.insert(userSchema.candidates).values({
+	await db.insert(schema.candidates).values({
 		id: candidateId,
 		url: profileData.linkedInUrl as string,
 		linkedinData: profileData,
@@ -279,8 +264,8 @@ export const processUrls = async (urls: string[]) => {
 
 		const existingCandidate = await db.query.candidates.findFirst({
 			where: or(
-				eq(userSchema.candidates.url, normalizedUrl),
-				eq(userSchema.candidates.url, `${normalizedUrl}/`)
+				eq(schema.candidates.url, normalizedUrl),
+				eq(schema.candidates.url, `${normalizedUrl}/`)
 			),
 		});
 		if (existingCandidate) {

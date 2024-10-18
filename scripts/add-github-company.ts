@@ -1,22 +1,10 @@
+import "dotenv/config";
 import { graphql } from "@octokit/graphql";
-import * as dotenv from "dotenv";
-import { neon, Pool } from "@neondatabase/serverless";
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { drizzle } from "drizzle-orm/neon-serverless";
 import { RateLimiter } from "@/github/graphql";
-
-// Load environment variables
-dotenv.config({ path: "../.env" });
-
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, { schema: userSchema });
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-
-if (!GITHUB_TOKEN) {
-	throw new Error("GitHub token is required in .env file");
-}
+import { env } from "../lib/env";
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 const rateLimiter = new RateLimiter();
 
@@ -36,7 +24,7 @@ const fetchUserCompany = async (username: string) => {
 				query,
 				login: username,
 				headers: {
-					authorization: `Bearer ${GITHUB_TOKEN}`,
+					authorization: `Bearer ${env.GITHUB_TOKEN}`,
 				},
 			})
 		);
@@ -52,12 +40,12 @@ const fetchUserCompany = async (username: string) => {
 const updateUserCompany = async (personId: string, company: string | null) => {
 	try {
 		await db
-			.update(userSchema.people)
+			.update(schema.people)
 			.set({
 				githubCompany: company || null,
 				isGithubCompanyChecked: true,
 			})
-			.where(eq(userSchema.people.id, personId));
+			.where(eq(schema.people.id, personId));
 		console.log(`Updated company for person ID: ${personId}`);
 	} catch (error) {
 		console.error(`Error updating company for person ID: ${personId}`, error);
@@ -84,15 +72,15 @@ const processUsers = async () => {
 	// Fetch users from the database
 	const users = await db
 		.select({
-			id: userSchema.people.id,
-			githubLogin: userSchema.people.githubLogin,
+			id: schema.people.id,
+			githubLogin: schema.people.githubLogin,
 		})
-		.from(userSchema.people)
+		.from(schema.people)
 		.where(
 			and(
-				isNull(userSchema.people.githubCompany),
-				eq(userSchema.people.isGithubCompanyChecked, false),
-				isNotNull(userSchema.people.githubLogin)
+				isNull(schema.people.githubCompany),
+				eq(schema.people.isGithubCompanyChecked, false),
+				isNotNull(schema.people.githubLogin)
 			)
 		);
 

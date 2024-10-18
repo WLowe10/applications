@@ -1,17 +1,7 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
+import "dotenv/config";
 import { eq } from "drizzle-orm/expressions";
-import { people, githubUsers } from "../server/db/schemas/users/schema";
-import dotenv from "dotenv";
-
-// Load environment variables
-dotenv.config({ path: "../.env" });
-
-// Initialize the database connection
-const pool = new Pool({ connectionString: process.env.DB_URL });
-const db = drizzle(pool, {
-	schema: { people, githubUsers },
-});
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 // Function to copy data from githubUsers to people
 async function copyGitHubDataToPeople() {
@@ -20,8 +10,8 @@ async function copyGitHubDataToPeople() {
 	// Fetch all people with a matching githubLogin in githubUsers
 	const peopleWithGitHub = await db
 		.select()
-		.from(people)
-		.innerJoin(githubUsers, eq(people.githubLogin, githubUsers.login))
+		.from(schema.people)
+		.innerJoin(schema.githubUsers, eq(schema.people.githubLogin, schema.githubUsers.login))
 		.execute();
 
 	console.log(`[copyGitHubDataToPeople] Found ${peopleWithGitHub.length} people to process.`);
@@ -36,7 +26,8 @@ async function copyGitHubDataToPeople() {
 	console.log(`[copyGitHubDataToPeople] Processing ${batches.length} batches.`);
 
 	for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-		const batch = batches[batchIndex];
+		const batch = batches[batchIndex]!;
+
 		console.log(
 			`[copyGitHubDataToPeople] Processing batch ${batchIndex + 1}/${batches.length}`
 		);
@@ -53,7 +44,7 @@ async function copyGitHubDataToPeople() {
 				// Update the people table with the corresponding data
 				try {
 					await db
-						.update(people)
+						.update(schema.people)
 						.set({
 							followers: user.followers,
 							following: user.following,
@@ -77,7 +68,7 @@ async function copyGitHubDataToPeople() {
 							twitterFollowerToFollowingRatio: user.twitterFollowerToFollowingRatio,
 							tweets: user.tweets,
 						})
-						.where(eq(people.id, personId))
+						.where(eq(schema.people.id, personId))
 						.execute();
 
 					console.log(

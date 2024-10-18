@@ -1,17 +1,6 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
-
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
+import "dotenv/config";
 import fetch from "node-fetch";
-
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY!,
-});
-
-const pinecone = new Pinecone({
-	apiKey: process.env.PINECONE_API_KEY!,
-});
+import { openai, pinecone } from "../lib/clients";
 
 const index = pinecone.Index("whop");
 
@@ -21,7 +10,7 @@ async function getEmbedding(text: string): Promise<number[]> {
 			model: "text-embedding-3-large",
 			input: text,
 		});
-		return response.data[0].embedding;
+		return response.data[0]!.embedding;
 	} catch (error) {
 		console.error("Error generating embedding:", error);
 		throw error;

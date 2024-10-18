@@ -73,6 +73,7 @@
 		"@types/pdf-parse": "^1.1.4",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
+		"@types/uuid": "^10.0.0",
 		"autoprefixer": "^10.0.1",
 		"drizzle-kit": "^0.23.0",
 		"drizzle-zod": "^0.5.1",

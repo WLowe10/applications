@@ -1,29 +1,16 @@
-import * as userSchema from "../server/db/schemas/users/schema";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import dotenv from "dotenv";
+import "dotenv/config";
 import { eq } from "drizzle-orm";
-
-dotenv.config({
-	path: "../.env",
-});
-
-const connection = neon(process.env.DB_URL!);
-
-const db = drizzle(connection, {
-	schema: {
-		...userSchema,
-	},
-});
+import { db } from "../server/db";
+import * as schema from "../server/db/schema";
 
 async function computeTopTechnologies(companyId: string) {
 	const companyDb = await db.query.company.findFirst({
 		with: {
 			candidates: {
-				where: eq(userSchema.candidates.isEngineer, true),
+				where: eq(schema.candidates.isEngineer, true),
 			},
 		},
-		where: eq(userSchema.company.id, companyId),
+		where: eq(schema.company.id, companyId),
 	});
 
 	if (!companyDb) return;
@@ -42,9 +29,9 @@ async function computeTopTechnologies(companyId: string) {
 		.map((entry) => entry[0]);
 
 	await db
-		.update(userSchema.company)
+		.update(schema.company)
 		.set({ topTechnologies })
-		.where(eq(userSchema.company.id, companyId));
+		.where(eq(schema.company.id, companyId));
 
 	console.log(`Updated company ${companyId} with top technologies.`);
 }

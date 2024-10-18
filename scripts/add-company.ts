@@ -1,23 +1,9 @@
+import "dotenv/config";
 import axios from "axios";
-import * as userSchema from "../server/db/schemas/users/schema";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import dotenv from "dotenv";
-import { getTopFeatures } from "./add-company-skills-based-on-linkedin";
 import { eq } from "drizzle-orm";
-import { googleSearch, processUrls } from "./google-search";
-
-dotenv.config({
-	path: "../.env",
-});
-
-const connection = neon(process.env.DB_URL!);
-
-const db = drizzle(connection, {
-	schema: {
-		...userSchema,
-	},
-});
+import { db } from "../server/db";
+import { getTopFeatures } from "./add-company-skills-based-on-linkedin";
+import * as schema from "../server/db/schema";
 
 const scrapeCompanyProfile = async (linkedinUrl: string) => {
 	const options = {
@@ -49,7 +35,7 @@ const processCompanyProfile = async (linkedinUrl: string) => {
 		);
 
 		try {
-			await db.insert(userSchema.company).values({
+			await db.insert(schema.company).values({
 				linkedinId: company.linkedInId,
 				name: company.name,
 				universalName: company.universalName,
@@ -92,7 +78,7 @@ const processCompanyProfile = async (linkedinUrl: string) => {
 		// }
 
 		const candidates = await db.query.candidates.findMany({
-			where: eq(userSchema.candidates.companyId, company.id),
+			where: eq(schema.candidates.companyId, company.id),
 		});
 
 		const techFrequencyMap: Record<string, number> = {};
@@ -108,11 +94,11 @@ const processCompanyProfile = async (linkedinUrl: string) => {
 			.map((entry) => entry[0].toLowerCase());
 
 		await db
-			.update(userSchema.company)
+			.update(schema.company)
 			.set({
 				topTechnologies,
 			})
-			.where(eq(userSchema.company.id, company.id));
+			.where(eq(schema.company.id, company.id));
 
 		console.log(`Company profile for ${company.name} inserted successfully.`);
 	} else {
