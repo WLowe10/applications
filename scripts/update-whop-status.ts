@@ -1,8 +1,8 @@
 import "dotenv/config";
 import axios from "axios";
 import { eq, and, isNotNull, ne, isNull } from "drizzle-orm";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 interface WhopResponse {
 	is_user: boolean;

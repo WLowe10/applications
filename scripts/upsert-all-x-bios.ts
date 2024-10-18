@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { isNotNull, eq, or, isNull, and, inArray } from "drizzle-orm";
-import { pinecone, openai } from "@/lib/clients";
-import { db } from "@/server/db";
-import * as schema from "@/server/db/schema";
+import { pinecone, openai } from "../src/lib/clients";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 const index = pinecone.Index("whop");
 

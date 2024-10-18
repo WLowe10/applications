@@ -2,9 +2,9 @@ import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import { eq, gt, or, and, asc } from "drizzle-orm";
-import { openai } from "../lib/clients";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { openai } from "../src/lib/clients";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 const companies = [
 	// {

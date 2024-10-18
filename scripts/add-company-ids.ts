@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { eq, inArray } from "drizzle-orm";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 async function updateCandidateCompanyIds() {
 	const batchSize = 500;

@@ -1,13 +1,13 @@
 "use client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { api } from "@/trpc/react";
 import { Avatar, Button, Flex, ScrollArea, TextFieldInput, Text, Separator } from "frosted-ui";
 import { Info, Loader, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useScrapedDialogStore } from "../lib/stores/filter-store";
 import { motion } from "framer-motion";
-import { useCompaniesViewStore } from "../lib/stores/companies-view-store";
+import { api } from "@/trpc/react";
+import { useScrapedDialogStore } from "@/lib/stores/filter-store";
+import { useCompaniesViewStore } from "@/lib/stores/companies-view-store";
 
 export function CompaniesView() {
 	const { filters: scrapedFilters, setFilters: setScrapedFilters } = useScrapedDialogStore();

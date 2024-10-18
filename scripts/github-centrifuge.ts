@@ -2,11 +2,11 @@ import "dotenv/config";
 import { InferSelectModel } from "drizzle-orm";
 import { graphql } from "@octokit/graphql";
 import { eq } from "drizzle-orm";
-import { RateLimiter } from "../utils/rate-limiter";
+import { RateLimiter } from "../src/utils/rate-limiter";
 import { getNormalizedLocation } from "./normalized-location-github";
-import { db } from "../server/db";
-import { env } from "../lib/env";
-import * as schema from "../server/db/schema";
+import { db } from "../src/server/db";
+import { env } from "../src/lib/env";
+import * as schema from "../src/server/db/schema";
 
 type GitHubUser = InferSelectModel<typeof schema.githubUsers>;
 

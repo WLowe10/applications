@@ -1,9 +1,9 @@
 import "dotenv/config";
 import axios from "axios";
 import { eq } from "drizzle-orm";
-import { db } from "../server/db";
+import { db } from "../src/server/db";
 import { getTopFeatures } from "./add-company-skills-based-on-linkedin";
-import * as schema from "../server/db/schema";
+import * as schema from "../src/server/db/schema";
 
 const scrapeCompanyProfile = async (linkedinUrl: string) => {
 	const options = {

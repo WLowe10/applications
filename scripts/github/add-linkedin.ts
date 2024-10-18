@@ -1,9 +1,9 @@
 import "dotenv/config";
 import { graphql } from "@octokit/graphql";
 import { eq, isNull } from "drizzle-orm";
-import { RateLimiter } from "../utils/rate-limiter";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { RateLimiter } from "../../src/utils/rate-limiter";
+import { db } from "../../src/server/db";
+import * as schema from "../../src/server/db/schema";
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 

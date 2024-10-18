@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { eq } from "drizzle-orm";
-import { openai } from "../lib/clients";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { openai } from "../src/lib/clients";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 export const getTopFeatures = async (query: string) => {
 	const completion = await openai.chat.completions.create({

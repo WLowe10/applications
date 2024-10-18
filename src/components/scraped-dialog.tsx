@@ -50,11 +50,11 @@ import { toast } from "sonner";
 import { toPascalCase } from "@/utils/one-liners";
 import { CandidateCard } from "./candidate-card";
 import { InferSelectModel } from "drizzle-orm";
-import { CompanyFilterReturnType, useScrapedDialogStore } from "../lib/stores/filter-store";
+import { CompanyFilterReturnType, useScrapedDialogStore } from "@/lib/stores/filter-store";
 import { Toaster } from "@/components/ui/sonner";
 import { CompaniesView } from "./companies-view";
 import Image from "next/image";
-import { useCompaniesViewStore } from "../lib/stores/companies-view-store";
+import { useCompaniesViewStore } from "@/lib/stores/companies-view-store";
 import type { people } from "@/server/db/schema";
 
 interface ProfileUrl {

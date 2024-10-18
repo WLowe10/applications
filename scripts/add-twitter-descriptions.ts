@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { and, eq, isNotNull, isNull } from "drizzle-orm/expressions";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 // Utility function to chunk an array into smaller arrays of a specified size
 function chunkArray<T>(array: T[], size: number): T[][] {

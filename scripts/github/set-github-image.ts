@@ -1,8 +1,8 @@
 import "dotenv/config";
 import fs from "fs/promises";
 import { eq } from "drizzle-orm";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { db } from "../../src/server/db";
+import * as schema from "../../src/server/db/schema";
 
 const updateUser = async (row: string) => {
 	const imageMatch = row.match(/github_image='([^']+)'/);

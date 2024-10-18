@@ -1,6 +1,6 @@
 import "dotenv/config";
 import fs from "fs";
-import { db } from "../server/db";
+import { db } from "../../src/server/db";
 
 // Function to calculate language score based on stars and repos for JS, TS, and Ruby
 const calculateLanguageScore = (languages: any): number => {

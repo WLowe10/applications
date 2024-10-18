@@ -25,7 +25,7 @@ import dotenv from "dotenv";
 import ws from "ws";
 import { jsonArrayContainsAny } from "@/lib/utils";
 import { graphql } from "@octokit/graphql";
-import { RateLimiter } from "../utils/rate-limiter";
+import { RateLimiter } from "./utils/rate-limiter";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -51,7 +51,7 @@ async function getEmbedding(text: string) {
 		encoding_format: "float",
 	});
 
-	return response.data[0].embedding;
+	return response.data[0]!.embedding;
 }
 
 async function querySimilarPeopleByEmbedding(

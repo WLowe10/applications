@@ -1,18 +1,18 @@
 import "dotenv/config";
 import { graphql } from "@octokit/graphql";
-import { RateLimiter } from "../utils/rate-limiter";
+import { RateLimiter } from "../../src/utils/rate-limiter";
 import {
 	gatherTopSkills,
 	generateMiniSummary,
 	scrapeLinkedInProfile,
-} from "@/src/find-similar-profiles-linkedin-subscriber";
+} from "@/find-similar-profiles-linkedin-subscriber";
 import { getNormalizedLocation, getNormalizedCountry } from "@/scripts/normalized-location-github";
 import { eq, or } from "drizzle-orm";
 import { Queue } from "async-await-queue";
 import { Mutex } from "async-mutex";
-import { openai } from "../lib/clients";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { openai } from "../../src/lib/clients";
+import { db } from "../../src/server/db";
+import * as schema from "../../src/server/db/schema";
 
 const rateLimiter = new RateLimiter();
 

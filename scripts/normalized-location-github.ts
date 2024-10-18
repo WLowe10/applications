@@ -1,9 +1,9 @@
 import "dotenv/config";
 import { eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-serverless";
-import { openai } from "../lib/clients";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { openai } from "../src/lib/clients";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 export async function getNormalizedLocation(location: string): Promise<string> {
 	try {

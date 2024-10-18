@@ -1,9 +1,9 @@
 import "dotenv/config";
 import { eq, or } from "drizzle-orm/expressions";
-import { people, candidates, githubUsers, jobTitles, skills } from "../server/db/schema";
-import * as schema from "../server/db/schema";
-import { db } from "../server/db";
-import { openai } from "../lib/clients";
+import { people, candidates, githubUsers, jobTitles, skills } from "../src/server/db/schema";
+import { db } from "../src/server/db";
+import { openai } from "../src/lib/clients";
+import * as schema from "../src/server/db/schema";
 
 const API_KEY = process.env.SOCIAL_DATA_API_KEY;
 
@@ -318,7 +318,7 @@ async function migrateData() {
 						`[migrateData] Successfully inserted/updated person record for GitHub user: ${githubUser.login}`
 					);
 
-					const personId = insertedPerson[0].id;
+					const personId = insertedPerson[0]!.id;
 
 					// Determine location to use
 					await updateLocationVector(
@@ -417,7 +417,7 @@ async function migrateData() {
 						`[migrateData] Successfully inserted/updated person record for candidate: ${candidate.url}`
 					);
 
-					const personId = insertedPerson[0].id;
+					const personId = insertedPerson[0]!.id;
 
 					// Determine location to use
 					await updateLocationVector(
@@ -511,14 +511,14 @@ async function migrateData() {
 							`[processTwitterAccounts] Successfully inserted/updated person record for Twitter account: ${twitterAccount.username}`
 						);
 
-						const personId = insertedPerson[0].id;
+						const personId = insertedPerson[0]!.id;
 
 						// Determine location to use
 						await updateLocationVector(
 							personId,
-							insertedPerson[0].normalizedLocation,
-							insertedPerson[0].location,
-							insertedPerson[0].linkedinData
+							insertedPerson[0]!.normalizedLocation,
+							insertedPerson[0]!.location,
+							insertedPerson[0]!.linkedinData
 						);
 
 						// Insert job titles embeddings

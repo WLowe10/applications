@@ -8,16 +8,16 @@ import {
 	schools,
 	companiesVectorNew,
 	jobTitlesVectorNew,
-} from "../server/db/schema";
+} from "../../src/server/db/schema";
 import { eq } from "drizzle-orm";
 import axios from "axios";
 import fetch from "node-fetch";
 import { isNotNull, or, isNull, and } from "drizzle-orm";
-import { db } from "../server/db";
-import { openai } from "../lib/clients";
-import { env } from "../lib/env";
-import { RateLimiter } from "../utils/rate-limiter";
-import * as schema from "../server/db/schema";
+import { db } from "../../src/server/db";
+import { openai } from "../../src/lib/clients";
+import { env } from "../../src/lib/env";
+import { RateLimiter } from "../../src/utils/rate-limiter";
+import * as schema from "../../src/server/db/schema";
 
 const rateLimiter = new RateLimiter();
 

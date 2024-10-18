@@ -1,6 +1,6 @@
 import "dotenv/config";
 import fetch from "node-fetch";
-import { openai, pinecone } from "../lib/clients";
+import { openai, pinecone } from "../src/lib/clients";
 
 const index = pinecone.Index("whop");
 

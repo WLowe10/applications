@@ -1,8 +1,8 @@
 import "dotenv/config";
 import fetch from "node-fetch";
 import { isNotNull, eq, or, isNull, and } from "drizzle-orm";
-import { db } from "../server/db";
-import * as schema from "@/server/db/schema";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 async function updateTwitterData() {
 	try {

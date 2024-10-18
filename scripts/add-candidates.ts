@@ -2,9 +2,9 @@ import "dotenv/config";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
 import { and, eq, isNotNull, ne, not, exists, inArray } from "drizzle-orm";
-import { db } from "../server/db";
-import { openai, pinecone } from "../lib/clients";
-import * as schema from "../server/db/schema";
+import { db } from "../src/server/db";
+import { openai, pinecone } from "../src/lib/clients";
+import * as schema from "../src/server/db/schema";
 
 const index = pinecone.Index("whop");
 

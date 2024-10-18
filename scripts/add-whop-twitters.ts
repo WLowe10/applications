@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { eq } from "drizzle-orm";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 const API_KEY = process.env.SOCIAL_DATA_API_KEY;
 const DB_URL = process.env.DB_URL;

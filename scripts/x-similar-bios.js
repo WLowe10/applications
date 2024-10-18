@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { pinecone } from "../lib/clients";
+import { pinecone } from "../src/lib/clients";
 
 const index = pinecone.Index("whop");
 

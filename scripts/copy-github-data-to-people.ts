@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { eq } from "drizzle-orm/expressions";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 // Function to copy data from githubUsers to people
 async function copyGitHubDataToPeople() {

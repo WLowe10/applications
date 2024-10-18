@@ -2,9 +2,9 @@ import "dotenv/config";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
 import { eq, inArray, or } from "drizzle-orm";
-import { openai } from "../lib/clients";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { openai } from "../src/lib/clients";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 export const generateSummary = async (profileData: any) => {
 	console.log("Generating summary for profile data...");

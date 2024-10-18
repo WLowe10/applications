@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { graphql } from "@octokit/graphql";
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
-import { RateLimiter } from "../utils/rate-limiter";
-import { env } from "../lib/env";
-import { db } from "../server/db";
-import * as schema from "../server/db/schema";
+import { RateLimiter } from "../src/utils/rate-limiter";
+import { env } from "../src/lib/env";
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
 
 const rateLimiter = new RateLimiter();
 

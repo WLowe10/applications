@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { and, eq, exists, inArray, isNotNull, or } from "drizzle-orm";
-import { InferResultType } from "@/utils/infer";
+import { and, eq, exists, inArray, InferSelectModel, isNotNull, or } from "drizzle-orm";
 import { jsonArrayContainsAny } from "@/lib/utils";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { Resource } from "sst";
@@ -501,7 +500,7 @@ Respond only with a JSON object that has four fields: "standardizedTechs", "stan
 			// Step 3: Fetch all companies from the database without related candidates
 			const companiesList = await ctx.db.query.company.findMany();
 
-			const matchingCompanies: InferResultType<"company">[] = [];
+			const matchingCompanies: (typeof schema.company.$inferSelect)[] = [];
 
 			const companyScores: Record<string, number> = {};
 

@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { db } from "../server/db";
-import { openai, pinecone } from "../lib/clients";
+import { db } from "../src/server/db";
+import { openai, pinecone } from "../src/lib/clients";
 import { inArray, eq, and, or, gt, asc } from "drizzle-orm";
-import * as schema from "../server/db/schema";
+import * as schema from "../src/server/db/schema";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

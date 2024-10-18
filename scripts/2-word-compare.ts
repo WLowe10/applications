@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { openai } from "../lib/clients";
+import { openai } from "../src/lib/clients";
 
 // Utility function to add generic context to the input text
 function enrichText(text: string): string {

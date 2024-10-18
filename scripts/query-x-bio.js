@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { openai, pinecone } from "../lib/clients";
+import { openai, pinecone } from "../src/lib/clients";
 
 const index = pinecone.Index("whop");
 
